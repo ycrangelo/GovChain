@@ -1,6 +1,7 @@
 import type { HardhatUserConfig } from "hardhat/config";
 
 import hardhatToolboxMochaEthersPlugin from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
+import "@nomicfoundation/hardhat-ethers";
 import { configVariable } from "hardhat/config";
 
 const config: HardhatUserConfig = {
@@ -25,6 +26,11 @@ const config: HardhatUserConfig = {
     hardhatMainnet: {
       type: "edr-simulated",
       chainType: "l1",
+    },
+    localhost: {
+    type: "http",
+    url: "http://127.0.0.1:8545",
+    chainId: 31337,
     },
     hardhatOp: {
       type: "edr-simulated",
