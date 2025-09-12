@@ -1,0 +1,3 @@
+***Project Overview:
+
+**The DPWH Transparency Portal is a decentralized Web3 platform that brings public infrastructure projects into the blockchain, making them fully transparent, verifiable, and auditable. Each infrastructure project—such as road construction, bridge repairs, or flood control initiatives—is represented as a unique NFT (ERC-721) containing key information like project budget, timeline, location, and a detailed proposal in PDF format.Stakeholders and approvers are issued a governance token (ERC-20), which they use to vote on project approval. This ensures that project approvals are secure, immutable, and publicly verifiable, while giving citizens and auditors a clear and transparent view of government infrastructure plans and spending.
