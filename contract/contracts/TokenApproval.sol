@@ -8,6 +8,7 @@ error notOwner(address _ownerAddress);
 contract TokenApproval is ERC20{
 
     address[] public approverAddress;
+    uint256 countApprovers;
     uint256 contractBalance = balanceOf(address(this));
     address immutable public i_owner;
 
@@ -23,14 +24,15 @@ contract TokenApproval is ERC20{
 
     function addApprovers(address[] memory _approverAddress) public OnlyOwner{ 
         //putting all of the approvers to the array of address
-        for (uint256 i = 0; i < _approverAddress.length; i++) {
+        for (uint256 i = countApprovers; i < _approverAddress.length; i++) {
             approverAddress.push(_approverAddress[i]);
+            countApprovers++;
         }
     }
 
     function destributeToken() public  OnlyOwner{
         for (uint256 i = 0; i < approverAddress.length; i++) {
-             _transfer(address(this), approverAddress[i], 1 * 10 ** decimals());
+             _transfer(address(this), approverAddress[i],1);
         }
     }
 
