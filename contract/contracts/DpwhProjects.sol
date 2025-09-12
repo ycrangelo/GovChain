@@ -50,7 +50,7 @@ contract DpwhProjects is ERC721  {
         address[] memory _contractors,
         string memory _timelineStart,
         string memory _timelineEnd,
-        string memory _pdfLink
+        string memory _proposalLink
         ) external OnlyOwner{
 
         projects[nextProjectId] = Project(
@@ -64,7 +64,7 @@ contract DpwhProjects is ERC721  {
             _timelineStart,
             _timelineEnd,
             Status.Pending,
-            _pdfLink
+            _proposalLink
         );
 
         _mint(msg.sender, nextProjectId);
@@ -73,10 +73,14 @@ contract DpwhProjects is ERC721  {
 
 
     // updating the status of the project // cost a gas // modifying record
-    function updateStatus( uint256 _projectId, Status _status ) external  {
+    function updateStatus( uint256 _projectId, Status _status ) external checkProjectExist(_projectId) {
        // checking if the project is exist
        projects[_projectId].status = _status;
 
+    }
+    // Function to get proposal PDF link
+    function getPDF(uint8 _projectId) checkProjectExist(_projectId) external view returns (string memory) {
+        return projects[_projectId].proposalLink;
     }
 
     //checking if you are the owner
