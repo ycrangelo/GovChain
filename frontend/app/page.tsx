@@ -84,7 +84,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative z-10 flex items-center justify-center h-screen px-4 text-center">
         <div>
-          <h1 className="text-7xl md:text-[11rem] font-bold"><span className="text-yellow-800 font-semibold">G</span><span className="text-blue-800 font-semibold">o</span><span className="text-red-800 font-semibold">v</span>Chain</h1>
+          <h1 className="text-7xl md:text-[11rem] font-bold"><span className="text-yellow-500 font-semibold">G</span><span className="text-blue-500 font-semibold">o</span><span className="text-red-500 font-semibold">v</span>Chain</h1>
           <p className="text-lg md:text-xl mt-4 mb-9">
             Immutable Records, Transparent Governance.
           </p>
@@ -132,7 +132,7 @@ export default function Home() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-8 w-full max-w-6xl">
           {/* Step 1 */}
           <div className="flex-1 flex flex-col items-center text-center p-6">
-            <FaFilePdf size={50} className="mb-4 text-blue-400" />
+            <p className="inline-block align-middle text-[50px]">🗂️</p>
             <h3 className="text-2xl font-semibold mb-2">Project Creation</h3>
             <p>
               Government uploads detailed project proposals (PDFs) to
@@ -148,7 +148,7 @@ export default function Home() {
 
           {/* Step 2 */}
           <div className="flex-1 flex flex-col items-center text-center p-6">
-            <FaCoins size={50} className="mb-4 text-green-400" />
+            <p className="inline-block align-middle text-[50px]">🎟</p>
             <h3 className="text-2xl font-semibold mb-2">Voting & Approval</h3>
             <p>
               Authorized stakeholders receive Governance <span className="text-yellow-400 font-semibold">Tokens</span>. (ERC-20). Tokens
@@ -163,7 +163,7 @@ export default function Home() {
 
           {/* Step 3 */}
           <div className="flex-1 flex flex-col items-center text-center p-6">
-            <FaGlobe size={50} className="mb-4 text-purple-400" />
+            <p className="inline-block align-middle text-[50px]">🔍</p>
             <h3 className="text-2xl font-semibold mb-2">Real-Time Transparency</h3>
             <p>
               Citizens and auditors can monitor project progress, budgets, and
@@ -184,7 +184,7 @@ export default function Home() {
           {/* First row */}
           <div className="flex flex-col md:flex-row justify-center gap-12 w-full">
             <div className="flex-1 flex flex-col items-center text-center p-6">
-              <FaFilePdf size={50} className="mb-4 text-blue-400" />
+              <p className="inline-block align-middle text-[50px]">👾</p>
               <h3 className="text-2xl font-semibold mb-2">Project NFTs</h3>
               <p>
                 Budget, timeline, signatories, and proposal PDFs are linked to
@@ -193,7 +193,7 @@ export default function Home() {
             </div>
 
             <div className="flex-1 flex flex-col items-center text-center p-6">
-              <FaUsers size={50} className="mb-4 text-green-400" />
+              <p className="inline-block align-middle text-[50px]">🪙</p>
               <h3 className="text-2xl font-semibold mb-2">Governance Tokens</h3>
               <p>
                 Tokenized voting ensures only real approvers can vote,
@@ -202,7 +202,7 @@ export default function Home() {
             </div>
 
             <div className="flex-1 flex flex-col items-center text-center p-6">
-              <FaCheckCircle size={50} className="mb-4 text-purple-400" />
+              <p className="inline-block align-middle text-[50px]">⚖</p>
               <h3 className="text-2xl font-semibold mb-2">
                 Immutable Voting & Audit Trail
               </h3>
@@ -216,7 +216,7 @@ export default function Home() {
           {/* Second row */}
           <div className="flex justify-center gap-12 w-full md:w-auto">
             <div className="flex-1 flex flex-col items-center text-center p-6 max-w-xs">
-              <FaCloud size={50} className="mb-4 text-yellow-400" />
+              <p className="inline-block align-middle text-[50px]">☁️</p>
               <h3 className="text-2xl font-semibold mb-2">Decentralized Storage</h3>
               <p>
                 Project PDFs and metadata are stored on IPFS, making all
@@ -225,7 +225,7 @@ export default function Home() {
             </div>
 
             <div className="flex-1 flex flex-col items-center text-center p-6 max-w-xs">
-              <FaTachometerAlt size={50} className="mb-4 text-pink-400" />
+              <p className="inline-block align-middle text-[50px]">📄</p>
               <h3 className="text-2xl font-semibold mb-2">Public Dashboard</h3>
               <p>
                 Citizens can track all projects, funding, and approvals in
@@ -244,7 +244,7 @@ export default function Home() {
       <a href="#about" className="hover:text-blue-400 transition">About</a>
       <a href="#Works" className="hover:text-blue-400 transition">How it Works</a>
       <a href="#Features" className="hover:text-blue-400 transition">Features</a>
-      <a href="#contact" className="hover:text-blue-400 transition">Contact</a>
+      <a href="#Dashboard" className="hover:text-blue-400 transition">Dashboard</a>
     </div>
 
     {/* Social / Community Links */}
