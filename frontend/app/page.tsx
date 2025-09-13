@@ -249,9 +249,9 @@ export default function Home() {
 
     {/* Social / Community Links */}
     <div className="flex gap-6 text-2xl">
-      <a href="https://twitter.com" target="_blank" className="hover:text-blue-400 transition">🐦</a>
-      <a href="https://discord.com" target="_blank" className="hover:text-blue-400 transition">💬</a>
-      <a href="https://github.com" target="_blank" className="hover:text-blue-400 transition">🐙</a>
+      <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-blue-400 transition">🐦</a>
+      <a href="https://discord.com" target="_blank" rel="noreferrer" className="hover:text-blue-400 transition">💬</a>
+      <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-blue-400 transition">🐙</a>
     </div>
   </div>
 
