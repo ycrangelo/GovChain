@@ -1,12 +1,12 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
-export default buildModule("DpwhProjectsModule", (m) => {
+export default buildModule("ProjectsModule", (m) => {
   // Deploy the DpwhProjects contract
-  const dpwhProjects = m.contract("DpwhProjects");
+  const Projects = m.contract("Projects");
 
   // You can also call contract functions after deployment if needed.
   // Example: mint a sample project NFT immediately after deploy:
-  m.call(dpwhProjects, "createProjectNft", [
+  m.call(Projects, "createProjectNft", [
     "Sample Project",
     "Manila City",
     1000000n,
@@ -18,6 +18,6 @@ export default buildModule("DpwhProjectsModule", (m) => {
     "ipfs://sampleProposalHash"
   ]);
   
-  m.call(dpwhProjects, "projects", [1n]); // fetch project #1
-  return { dpwhProjects };
+  m.call(Projects, "projects", [1n]); // fetch project #1
+  return { Projects };
 });

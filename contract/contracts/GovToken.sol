@@ -5,7 +5,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 
 error notOwner(address _ownerAddress);
-contract TokenApproval is ERC20{
+contract GovToken is ERC20{
 
     address[] public approverAddress;
     uint256 countApprovers;
@@ -14,7 +14,7 @@ contract TokenApproval is ERC20{
 
     constructor() ERC20("TOKEN_APPROVAL", "TKNPRVL") {
         //giving the contract itself a token
-        _mint(address(this), 1000);
+        _mint(address(this), 2000);
         i_owner = msg.sender; //setting the owner of the contract
     }
 

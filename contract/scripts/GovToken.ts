@@ -10,7 +10,7 @@ async function main() {
   console.log("🚀 Deploying TokenApproval...");
 
   // 2. Deploy contract
-  const TokenApproval = await ethers.getContractFactory("TokenApproval");
+  const TokenApproval = await ethers.getContractFactory("GovToken");
   const token = await TokenApproval.deploy();
   await token.waitForDeployment();
 

@@ -10,12 +10,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 error ProjectNotExist(uint256 _projectId);
 error notOwner(address _ownerAddress);
 
-contract DpwhProjects is ERC721  { 
+contract Projects is ERC721  { 
 
 
     address immutable public i_owner;
     uint256 public nextProjectId =1;
-    enum Status { Pending, Approved, Ongoing, Completed }
+    enum Status { Pending, Rejected, Approved, Ongoing, Completed }
 
     constructor() ERC721("DPWH_PROJECTS", "DPWHP") {
         i_owner = msg.sender; //setting the owner of the contract
