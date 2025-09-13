@@ -2,23 +2,23 @@ import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import { Link } from "@heroui/link";
 import clsx from "clsx";
-import { Orbitron } from "next/font/google";
 import { Providers } from "./providers";
 import { fontSans } from "@/config/fonts";
+import { Inter } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "simple",
-  description: "simlpe",
+  description: "simple",
   icons: {
     icon: "/favicon.ico",
   },
 };
 
-const orbitron = Orbitron({
+
+const ibmPlex = Inter({
   subsets: ["latin"],
   weight: ["400", "700"],
 });
-
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
@@ -38,7 +38,7 @@ export default function RootLayout({
         className={clsx(
           "min-h-screen text-foreground bg-background antialiased",
           fontSans.variable,
-          orbitron.className,
+          ibmPlex.className, // 👈 pixel font
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
