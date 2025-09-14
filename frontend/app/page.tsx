@@ -244,7 +244,7 @@ export default function Home() {
       <a href="#about" className="hover:text-blue-400 transition">About</a>
       <a href="#Works" className="hover:text-blue-400 transition">How it Works</a>
       <a href="#Features" className="hover:text-blue-400 transition">Features</a>
-      <a href="#Dashboard" className="hover:text-blue-400 transition">Dashboard</a>
+      <a href="#Projects" className="hover:text-blue-400 transition">Dashboard</a>
     </div>
 
     {/* Social / Community Links */}

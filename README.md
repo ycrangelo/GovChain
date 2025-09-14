@@ -1,3 +1,7 @@
-### Project Overview:
+## Project Overview:
 
-## The DPWH Transparency Portal is a decentralized Web3 platform that brings public infrastructure projects into the blockchain, making them fully transparent, verifiable, and auditable. Each infrastructure project—such as road construction, bridge repairs, or flood control initiatives—is represented as a unique NFT (ERC-721) containing key information like project budget, timeline, location, and a detailed proposal in PDF format.Stakeholders and approvers are issued a governance token (ERC-20), which they use to vote on project approval. This ensures that project approvals are secure, immutable, and publicly verifiable, while giving citizens and auditors a clear and transparent view of government infrastructure plans and spending.
+### GovChain is a decentralized Web3 platform designed to bring full transparency to government projects. By leveraging blockchain technology, GovChain ensures that public initiatives—ranging from infrastructure development to community programs—are fully verifiable, auditable, and tamper-proof.
+
+### Each project is represented as a unique NFT (ERC-721), storing essential details such as budget, timeline, location, and proposal documents (PDFs). Stakeholders and authorized approvers receive governance tokens (ERC-20) to vote on project approvals, making the process secure, immutable, and publicly accountable.
+
+### With GovChain, citizens, auditors, and government officials can track project progress in real-time, verify funding allocations, and participate in decentralized governance, creating a transparent and trustable public project ecosystem.
