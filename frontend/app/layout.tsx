@@ -7,10 +7,10 @@ import { fontSans } from "@/config/fonts";
 import { Inter } from "next/font/google";
 
 export const metadata: Metadata = {
-  title: "simple",
-  description: "simple",
+  title: "Govchain",
+  description: "GovChain is a decentralized Web3 platform designed to bring full transparency to government projects. By leveraging blockchain technology, GovChain ensures that public initiatives—ranging from infrastructure development to community programs—are fully verifiable, auditable, and tamper-proof.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.png",
   },
 };
 

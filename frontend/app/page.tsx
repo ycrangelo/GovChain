@@ -12,8 +12,7 @@ import {
   FaBolt,
 } from "react-icons/fa";
 import { Button } from "@heroui/button";
-
-export default function Home() {
+export default function LandingPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Background particle animation
@@ -80,8 +79,8 @@ export default function Home() {
   return (
     <div className="relative overflow-hidden bg-black text-white" >
       <canvas ref={canvasRef} className="absolute inset-0 z-0" />
-
-      {/* Hero Section */}
+      
+        {/* Hero Section */}
       <section className="relative z-10 flex items-center justify-center h-screen px-4 text-center">
         <div>
           <h1 className="text-7xl md:text-[11rem] font-bold"><span className="text-yellow-500 font-semibold">G</span><span className="text-blue-500 font-semibold">o</span><span className="text-red-500 font-semibold">v</span>Chain</h1>
@@ -244,7 +243,7 @@ export default function Home() {
       <a href="#about" className="hover:text-blue-400 transition">About</a>
       <a href="#Works" className="hover:text-blue-400 transition">How it Works</a>
       <a href="#Features" className="hover:text-blue-400 transition">Features</a>
-      <a href="#Projects" className="hover:text-blue-400 transition">Dashboard</a>
+      <a href="#Projects" className="hover:text-blue-400 transition">Projects</a>
     </div>
 
     {/* Social / Community Links */}
