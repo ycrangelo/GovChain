@@ -37,7 +37,7 @@ export default function ProjectInfo({ params }: ProjectInfoProps) {
       <p className="text-gray-300 mb-2"><strong>Signatories / Approvers:</strong> {project.signatories.join(", ")}</p>
       <p className="text-gray-300 mb-2">
         <strong>PDF Proposal:</strong>{" "}
-        <a href={project.pdfProposal} target="_blank" className="text-blue-400 underline">
+        <a href={project.pdfProposal} target="_blank" rel="noreferrer" className="text-blue-400 underline">
           View PDF
         </a>
       </p>
