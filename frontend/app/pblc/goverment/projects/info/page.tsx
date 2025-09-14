@@ -1,16 +1,12 @@
 import { Button } from "@heroui/button";
 import Link from "next/link";
 
-interface ProjectInfoProps {
-  params: { id: string };
-}
 
-export default function ProjectInfo({ params }: ProjectInfoProps) {
-  const { id } = params;
+export default function ProjectInfo() {
 
   // Dummy NFT data
   const project = {
-    name: `Project ${id}`,
+    name: `Project 1`,
     location: "Cebu City",
     budget: "₱10,000,000",
     startDate: "2025-01-01",
@@ -19,7 +15,7 @@ export default function ProjectInfo({ params }: ProjectInfoProps) {
     pdfProposal: "https://example.com/proposal.pdf",
     status: "Ongoing",
     nftContract: "0x1234567890abcdef1234567890abcdef12345678", // example ERC-721 contract
-    tokenId: id,
+    tokenId: 1,
   };
 
   const etherscanLink = `https://etherscan.io/token/${project.nftContract}?a=${project.tokenId}`;
