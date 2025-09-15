@@ -3,7 +3,7 @@ import { Metadata, Viewport } from "next";
 import { Link } from "@heroui/link";
 import clsx from "clsx";
 import { Providers } from "./providers";
-import { fontSans } from "@/config/fonts";
+import { fontSans } from "@/utils/fonts";
 import { Inter } from "next/font/google";
 
 export const metadata: Metadata = {

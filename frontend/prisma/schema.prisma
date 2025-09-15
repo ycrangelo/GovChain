@@ -1,0 +1,39 @@
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+//schema for Employee table
+model Approvers {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  position          String
+  contractAddress   String
+  timeCreated       DateTime @default(now())
+}
+
+model Projects {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  nftId          Int
+  projectName    String
+  location       String
+  budgetPeso     Int
+  signatories    String[]   // store Ethereum addresses as strings
+  engineers      String[]   // store Ethereum addresses as strings
+  contractors    String[]   // store Ethereum addresses as strings
+  timelineStart  String     
+  timelineEnd    String
+  status         String     // you can model enum if you want (see below)
+  proposalLink   String     // IPFS link
+}
+
