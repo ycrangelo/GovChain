@@ -6,12 +6,10 @@ import { ethers } from "ethers";
 import Image from "next/image";
 
 export default function Login() {
-  const [account, setAccount] = useState<string | null>(null);
-  // Typecast window to any
-  const anyWindow: any = window;
-  // Connect to MetaMask
+  const [account, setAccount] = useState<string>("");
+
   const connectWallet = async () => {
-    if (typeof anyWindow.ethereum === "undefined") {
+    if (!window.ethereum) {
       alert("MetaMask is not installed!");
       return;
     }
@@ -20,11 +18,13 @@ export default function Login() {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const accounts = await provider.send("eth_requestAccounts", []);
       setAccount(accounts[0]);
+      console.log("Connected account:", accounts[0]);
     } catch (err) {
-      console.error("Error connecting to MetaMask:", err);
+      console.error(err);
+      alert("Failed to connect wallet");
     }
   };
-
+  
   return (
     <div className="flex h-screen items-center justify-center bg-black text-white">
       <div className="p-8  text-center flex flex-col items-center">
