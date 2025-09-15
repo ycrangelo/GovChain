@@ -1,33 +1,37 @@
-// app/page.tsx
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ethers } from "ethers";
-import Image from "next/image";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { ethers } from 'ethers';
+import Image from 'next/image';
 
 export default function Login() {
-  const [account, setAccount] = useState<string>("");
+  const [account, setAccount] = useState<string>('');
+  const router = useRouter();
 
   const connectWallet = async () => {
     if (!window.ethereum) {
-      alert("MetaMask is not installed!");
+      alert('MetaMask is not installed!');
       return;
     }
 
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const accounts = await provider.send("eth_requestAccounts", []);
+      const accounts = await provider.send('eth_requestAccounts', []);
       setAccount(accounts[0]);
-      console.log("Connected account:", accounts[0]);
+
+      console.log('Connected account:', accounts[0]);
+      // Redirect to dashboard with dynamic path
+      router.push(`/approver/dashboard/${accounts[0]}`);
     } catch (err) {
       console.error(err);
-      alert("Failed to connect wallet");
+      alert('Failed to connect wallet');
     }
   };
-  
+
   return (
     <div className="flex h-screen items-center justify-center bg-black text-white">
-      <div className="p-8  text-center flex flex-col items-center">
+      <div className="p-8 text-center flex flex-col items-center">
         <h1 className="text-3xl font-bold mb-6">Login with MetaMask</h1>
 
         {account ? (
