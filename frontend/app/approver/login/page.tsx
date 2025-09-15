@@ -7,10 +7,11 @@ import Image from "next/image";
 
 export default function Login() {
   const [account, setAccount] = useState<string | null>(null);
-
+  // Typecast window to any
+  const anyWindow: any = window;
   // Connect to MetaMask
   const connectWallet = async () => {
-    if (typeof window.ethereum === "undefined") {
+    if (typeof anyWindow.ethereum === "undefined") {
       alert("MetaMask is not installed!");
       return;
     }
