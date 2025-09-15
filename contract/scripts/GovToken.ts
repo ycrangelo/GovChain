@@ -27,7 +27,7 @@ async function main() {
   console.log("👥 Added approvers:", approvers);
 
   // 5. Distribute tokens
-  await token.destributeToken();
+  await token.distributeToken();
   console.log("🎉 Tokens distributed!");
 
   // 6. Check balances of approvers

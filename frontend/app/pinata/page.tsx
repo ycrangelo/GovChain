@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { pinata } from "@/utils/config";
 
-export default function Home() {
+export default function Pinata() {
   const [file, setFile] = useState<File>();
   const [uploading, setUploading] = useState(false);
   const [fileUrl, setFileUrl] = useState<string>("");

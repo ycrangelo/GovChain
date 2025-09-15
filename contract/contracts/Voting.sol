@@ -21,17 +21,24 @@ contract Voting {
     struct Vote {
         uint256 yes;
         uint256 no;
-        address[] eligibleVoters; // all eligible voters
-        uint256 votedCount; // how many already voted
-        bool finalized; // para hindi ma-finalize ulit
+        address[] eligibleVoters;
+        uint256 votedCount;
+        bool finalized;
         mapping(address => bool) hasVoted; 
         mapping(address => bool) votedYes;
         mapping(address => bool) votedNo;
-        mapping(address => bool) isEligible; // quick lookup for eligibility
+        mapping(address => bool) isEligible;
     }
 
     mapping(uint256 => Vote) private votes;
     uint256 public approvalThreshold = 70; // 70%
+
+    // ------------------------
+    // EVENTS
+    // ------------------------
+    event VoteSessionCreated(uint256 indexed projectId, address[] eligibleVoters);
+    event VoteCast(uint256 indexed projectId, address indexed voter, bool approved, uint256 weight);
+    event VoteFinalized(uint256 indexed projectId, bool approved, uint256 yesVotes, uint256 noVotes);
 
     /// @notice Create a vote session with eligible voters
     function createVoteSession(uint256 _projectId, address[] calldata _eligibleVoters) external {
@@ -42,6 +49,8 @@ contract Voting {
             voter.eligibleVoters.push(_eligibleVoters[i]);
             voter.isEligible[_eligibleVoters[i]] = true;
         }
+
+        emit VoteSessionCreated(_projectId, _eligibleVoters);
     }
 
     /// @notice Cast a vote
@@ -65,6 +74,8 @@ contract Voting {
         voter.hasVoted[msg.sender] = true;
         voter.votedCount++;
 
+        emit VoteCast(_projectId, msg.sender, approve, voterBalance);
+
         //  Auto-finalize if all voters already voted
         if (voter.votedCount == voter.eligibleVoters.length) {
             autoFinalize(_projectId);
@@ -86,20 +97,22 @@ contract Voting {
         uint256 noVotes = voter.no;
 
         uint256 totalVotes = yesVotes + noVotes;
-
         if (totalVotes == 0) {
             revert NoVoteCast();
         }
 
         uint256 yesPercent = (yesVotes * 100) / totalVotes;
+        bool approved = yesPercent >= approvalThreshold;
 
-        if (yesPercent >= approvalThreshold) {
+        if (approved) {
             i_govProjects.updateStatus(_projectId, IGovProjects.Status.Approved);
         } else {
             i_govProjects.updateStatus(_projectId, IGovProjects.Status.Rejected);
         }
 
-        voter.finalized = true; // mark as finalized
+        voter.finalized = true;
+
+        emit VoteFinalized(_projectId, approved, yesVotes, noVotes);
     }
 
     /// @notice Check if all eligible voters have voted

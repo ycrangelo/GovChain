@@ -10,14 +10,14 @@ async function main() {
   console.log("🚀 Deploying DpwhProjects...");
 
   // 2. Deploy contract
-  const DpwhProjects = await ethers.getContractFactory("DpwhProjects");
-  const dpwh = await DpwhProjects.deploy();
-  await dpwh.waitForDeployment();
+  const projects = await ethers.getContractFactory("Projects");
+  const prjct = await projects.deploy();
+  await prjct.waitForDeployment();
 
-  console.log("✅ Contract deployed at:", await dpwh.getAddress());
+  console.log("✅ Contract deployed at:", await prjct.getAddress());
 
   // 3. Call createProjectNft
-  const tx = await dpwh.createProjectNft(
+  const tx = await prjct.createProjectNft(
     "Sample Project",
     "Manila City",
     1_000_000n,
@@ -42,7 +42,7 @@ async function main() {
   console.log("📌 Project created successfully!");
 
   // 4. Fetch project #1
-  const project1 = await dpwh.projects(1);
+  const project1 = await prjct.projects(1);
 
   console.log("📝 Project #1:");
   console.log("ID:", project1.projectId.toString());

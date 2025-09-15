@@ -9,8 +9,8 @@ async function main() {
 
   console.log("🚀 Deploying Voting contract...");
 
-  const govTokenAddr = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"; // your GovToken
-  const projectsAddr = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"; // your Projects
+  const govTokenAddr = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // your GovToken
+  const projectsAddr = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"; // your Projects
 
   // 2. Deploy Voting contract
   const Voting = await ethers.getContractFactory("Voting");
@@ -52,11 +52,17 @@ async function main() {
   await tx2.wait();
 
   console.log("📌 Distributing tokens...");
-  const tx3 = await token.connect(deployer).destributeToken();
+  const tx3 = await token.connect(deployer).distributeToken();
   await tx3.wait();
 
   const bal = await token.balanceOf(deployer.address);
   console.log("Deployer token balance:", bal.toString());
+
+    console.log("📌 Creating vote session...");
+  const eligibleVoters = [deployer.address]; // you can add more addresses
+  const tx23 = await voting.connect(deployer).createVoteSession(1, eligibleVoters);
+  await tx23.wait();
+  console.log("✅ Vote session created");
 
   // 7. Cast a vote (YES)
   console.log("🗳 Casting vote...");
@@ -65,10 +71,10 @@ async function main() {
   console.log("✅ Vote submitted");
 
   // 8. Finalize vote
-  console.log("📊 Finalizing vote...");
-  const tx5 = await voting.connect(deployer).finalize(1);
-  await tx5.wait();
-  console.log("✅ Vote finalized");
+  // console.log("📊 Finalizing vote...");
+  // const tx5 = await voting.connect(deployer).finalize(1);
+  // await tx5.wait();
+  // console.log("✅ Vote finalized");
 
   // 9. Fetch project status
   const project1 = await projects.projects(1);
