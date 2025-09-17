@@ -4,13 +4,15 @@ import { useParams } from 'next/navigation';
 import { useState, useEffect } from "react";
 import { Switch } from "@heroui/switch";
 import { Image } from "@heroui/image";
+import ModalCreate from '../../../../component/ModalCreate'
+
 
 export default function Dashboard() {
   const params = useParams();
   const account = params.account; // dynamic segment [account]
   const [isMain, setIsMain] = useState<boolean>(false);
   const [isSelected, setIsSelected] = useState<boolean>(true);
-  const [view, setView] = useState<string>('Approvers');
+  const [view, setView] = useState<string>('Pending');
 
   useEffect(() => {
     if (account === process.env.NEXT_PUBLIC_MAIN) {
@@ -19,7 +21,7 @@ export default function Dashboard() {
   }, [account]);
 
   useEffect(() => {
-    setView(isSelected ? "Approvers" : "Projects");
+    setView(isSelected ? "Pending" : "Not Pending");
   }, [isSelected]);
 
   return (
@@ -36,12 +38,14 @@ export default function Dashboard() {
             />
             <span className="text-lg font-semibold">{view}</span>
           </div>
-
+          <div className="flex gap-4">
+          <Button className="">
+            Approvers
+          </Button>
           {isMain && (
-            <Button variant="solid" className="bg-gray-800 hover:bg-gray-700 text-white border">
-              Add Project
-            </Button>
+            <ModalCreate/>
           )}
+          </div>
         </div>
 
         {/* Project Grid */}
