@@ -18,8 +18,6 @@ contract Projects is ERC721 {
         string    location;
         uint256   budgetPeso;
         address[] signatories;
-        address[] engineers;
-        address[] contractors;
         string    timelineStart;
         string    timelineEnd;
         Status    status;
@@ -60,8 +58,6 @@ contract Projects is ERC721 {
         string memory _location,
         uint256 _budget,
         address[] memory _signatories,
-        address[] memory _engineers,
-        address[] memory _contractors,
         string memory _timelineStart,
         string memory _timelineEnd,
         string memory _proposalLink
@@ -72,8 +68,6 @@ contract Projects is ERC721 {
             _location,
             _budget,
             _signatories,
-            _engineers,
-            _contractors,
             _timelineStart,
             _timelineEnd,
             Status.Pending,
