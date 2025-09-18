@@ -13,7 +13,7 @@ export default function Dashboard() {
   const account = params.account; // dynamic segment [account]
   const [isMain, setIsMain] = useState<boolean>(false);
   const [isSelected, setIsSelected] = useState<boolean>(true);
-  const [view, setView] = useState<string>('Proposed');
+  const [view, setView] = useState<string>('Approved');
 
   useEffect(() => {
     if (account === process.env.NEXT_PUBLIC_MAIN) {
@@ -22,7 +22,7 @@ export default function Dashboard() {
   }, [account]);
 
   useEffect(() => {
-    setView(isSelected ? "Proposed" : "Approved");
+    setView(isSelected ? "Approved" : "Proposed");
   }, [isSelected]);
 
   return (
@@ -34,7 +34,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <Switch
               size="md"
-              color="default"
+              color="success"
               isSelected={isSelected}
               onValueChange={setIsSelected}
             />
@@ -49,12 +49,12 @@ export default function Dashboard() {
                 Approvers
               </Button>
             </Link>
-          <Button className="">
+          <Button color="danger" className="">
             Rejected
           </Button>
           {isMain && (
             <>
-          <Button className="">
+          <Button color="warning" className="">
             Manage Approvers
           </Button>
             <ModalCreate/>

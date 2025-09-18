@@ -45,7 +45,7 @@ export default function ModalCreate() {
   return (
     <>
       <div className="flex flex-wrap gap-3">
-        <Button onPress={onOpen}>Add Project</Button>
+        <Button color="success" onPress={onOpen}>Add Project</Button>
       </div>
       <Modal
         isOpen={isOpen}
@@ -80,10 +80,10 @@ export default function ModalCreate() {
 
                   {/* File Upload Section */}
                   <div className="flex flex-col gap-2">
-                    <Button onPress={openFileDialog}>Upload Proposal File</Button>
                     {fileName && (
                       <span className="text-sm text-gray-600">Selected: {fileName}</span>
                     )}
+                    <Button onPress={openFileDialog}>Upload Proposal File</Button>
                     <input
                       type="file"
                       ref={fileInputRef}
