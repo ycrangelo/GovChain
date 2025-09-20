@@ -29,11 +29,9 @@ model Projects {
   location       String
   budgetPeso     Int
   signatories    String[]   // store Ethereum addresses as strings
-  engineers      String[]   // store Ethereum addresses as strings
-  contractors    String[]   // store Ethereum addresses as strings
   timelineStart  String     
   timelineEnd    String
-  status         String     // you can model enum if you want (see below)
+  status         Int?     // you can model enum if you want
   proposalLink   String     // IPFS link
 }
 
