@@ -54,9 +54,11 @@ export default function Dashboard() {
           </Button>
           {isMain && (
             <>
+             <Link href={`/approver/dashboard/${account}/signatories/admin`}>
           <Button color="warning" className="">
             Manage Approvers
           </Button>
+          </Link>
             <ModalCreate/>
             </>
           )}

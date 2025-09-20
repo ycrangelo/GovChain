@@ -49,7 +49,7 @@
     "@heroui/table": "^2.2.26",
     "@heroui/tabs": "2.2.23",
     "@heroui/theme": "2.4.22",
-    "@heroui/toast": "2.0.16",
+    "@heroui/toast": "^2.0.16",
     "@heroui/tooltip": "2.2.23",
     "@heroui/user": "2.2.21",
     "@prisma/client": "^6.16.1",

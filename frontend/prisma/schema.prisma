@@ -19,6 +19,7 @@ model Approvers {
   name              String
   position          String
   contractAddress   String
+  status            Int @default(1)
   timeCreated       DateTime @default(now())
 }
 
