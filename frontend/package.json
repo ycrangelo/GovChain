@@ -17,6 +17,7 @@
     "@heroui/badge": "2.2.16",
     "@heroui/button": "2.2.26",
     "@heroui/card": "2.2.24",
+    "@heroui/checkbox": "^2.3.26",
     "@heroui/chip": "2.2.21",
     "@heroui/code": "2.2.20",
     "@heroui/date-picker": "^2.3.27",
