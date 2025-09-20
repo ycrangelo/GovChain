@@ -1,8 +1,9 @@
 import type { HardhatUserConfig } from "hardhat/config";
-
 import hardhatToolboxMochaEthersPlugin from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
-import "@nomicfoundation/hardhat-ethers";
 import { configVariable } from "hardhat/config";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const config: HardhatUserConfig = {
   plugins: [hardhatToolboxMochaEthersPlugin],
@@ -27,11 +28,6 @@ const config: HardhatUserConfig = {
       type: "edr-simulated",
       chainType: "l1",
     },
-    localhost: {
-    type: "http",
-    url: "http://127.0.0.1:8545",
-    chainId: 31337,
-    },
     hardhatOp: {
       type: "edr-simulated",
       chainType: "op",
@@ -39,9 +35,13 @@ const config: HardhatUserConfig = {
     sepolia: {
       type: "http",
       chainType: "l1",
-      url: configVariable("SEPOLIA_RPC_URL"),
-      accounts: [configVariable("SEPOLIA_PRIVATE_KEY")],
+      url: process.env.ALCHEMY_SEPOLIA_URL || "", 
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
+  },
+  // @ts-ignore
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY, // added for verifying contracts after deployment
   },
 };
 

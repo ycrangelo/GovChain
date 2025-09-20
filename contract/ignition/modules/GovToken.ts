@@ -1,6 +1,6 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
-export default buildModule("TokenApprovalModule", (m) => {
+export default buildModule("TokenModule", (m) => {
   // Deploy the DpwhProjects contract
   const GovToken = m.contract("GovToken");
 

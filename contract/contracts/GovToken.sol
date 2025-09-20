@@ -16,9 +16,9 @@ contract GovToken is ERC20 {
     event TokenDistributed(address indexed to, uint256 amount);
     event OwnerSet(address indexed owner);
     
-    constructor() ERC20("TOKEN_APPROVAL", "TKNPRVL") {
+    constructor() ERC20("GovToken", "GVCHNTK") {
         // mint tokens to the contract itself
-        _mint(address(this), 2000);
+        _mint(address(this), 2000 * 10 ** decimals());
         i_owner = msg.sender;
 
         emit OwnerSet(msg.sender);
@@ -42,7 +42,7 @@ contract GovToken is ERC20 {
 
     function distributeToken() public OnlyOwner {
         for (uint256 i = 0; i < approverAddress.length; i++) {
-            _transfer(address(this), approverAddress[i], 1);
+            _transfer(address(this), approverAddress[i], 1 * 10 ** decimals());
 
             emit TokenDistributed(approverAddress[i], 1);
         }
