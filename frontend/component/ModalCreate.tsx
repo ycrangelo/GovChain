@@ -14,7 +14,7 @@ import { Input } from "@heroui/input";
 import { NumberInput } from "@heroui/number-input";
 import { DatePicker } from "@heroui/date-picker";
 import { CheckboxGroup, Checkbox } from "@heroui/checkbox";
-import { parseDate } from "@internationalized/date";
+import { addToast } from "@heroui/toast";
 
 // --- Types ---
 interface Signatory {
@@ -113,14 +113,23 @@ export default function ModalCreate() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [signatories, setSignatories] = useState<Signatory[]>([]);
   const [budget, setBudget] = useState<number>(0);
+  const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [projectName, setProjectName] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [startDate, setStartDate] = useState<any>(null);
   const [endDate, setEndDate] = useState<any>(null);
   const [selectModalOpen, setSelectModalOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const CONTRACT_ADDRESS = "0x3E1623c2F0B9CB1f1558b4B126f0458792Bc8009";
+  const CONTRACT_ABI = [
+    "function createProjectNft(string _name,string _location,uint256 _budget,address[] _signatories,string _timelineStart,string _timelineEnd,string _proposalLink,string _image) external",
+  ];
+
+  const NFT_IMAGE_URL = "https://cyan-additional-crab-497.mypinata.cloud/ipfs/bafkreigehgu5ijanavgtfswcedcpablrv3kqjf575zdqsn467qps3puq6a";
 
   const removeSignatory = (id: string) => {
     setSignatories((prev) => prev.filter((s) => s.id !== id));
@@ -128,27 +137,16 @@ export default function ModalCreate() {
 
   const openFileDialog = () => fileInputRef.current?.click();
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) setFileName(e.target.files[0].name);
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+      setFileName(e.target.files[0].name);
+    }
   };
 
-  // Convert DateValue to string for API
-  const dateValueToString = (dateValue: any): string => {
+  const dateToString = (dateValue: any) => {
     if (!dateValue) return "";
-    
-    // If it's already a string, return it
-    if (typeof dateValue === 'string') return dateValue;
-    
-    // If it has a toString method, use it
-    if (dateValue.toString && typeof dateValue.toString === 'function') {
-      return dateValue.toString();
-    }
-    
-    // If it's a Date object, format it
-    if (dateValue instanceof Date) {
-      return dateValue.toISOString().split('T')[0];
-    }
-    
-    // For other cases, try to get the date string
+    if (typeof dateValue === "string") return dateValue;
+    if (dateValue instanceof Date) return dateValue.toISOString().split("T")[0];
     try {
       return String(dateValue);
     } catch {
@@ -156,33 +154,109 @@ export default function ModalCreate() {
     }
   };
 
+  const uploadFileToPinata = async () => {
+    if (!file) throw new Error("No file selected");
+
+    const res = await fetch("/api/url");
+    if (!res.ok) throw new Error("Failed to get signed URL");
+    const { url } = await res.json();
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const uploadRes = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!uploadRes.ok) throw new Error("Failed to upload file to Pinata");
+
+    const data = await uploadRes.json();
+    const cid = data.cid || data.IpfsHash;
+    return `https://gateway.pinata.cloud/ipfs/${cid}`;
+  };
+
   const handleSave = async () => {
     try {
-      // Convert dates to strings for API
-      const startDateStr = dateValueToString(startDate);
-      const endDateStr = dateValueToString(endDate);
+      setUploading(true);
 
-      if (
-        !projectName ||
-        !location ||
-        !startDateStr ||
-        !endDateStr ||
-        !budget ||
-        !fileName ||
-        signatories.length === 0
-      ) {
-        alert("Please fill all fields and add at least one signatory.");
+      if (!window.ethereum) {
+        alert("MetaMask is not installed!");
+        setUploading(false);
         return;
       }
 
+      const { ethers } = await import("ethers");
+
+      // Switch to Sepolia
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0xaa36a7" }],
+        });
+      } catch (switchError: any) {
+        if (switchError.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                {
+                  chainId: "0xaa36a7",
+                  chainName: "Sepolia Testnet",
+                  rpcUrls: ["https://sepolia.infura.io/v3/YOUR_INFURA_KEY"],
+                  nativeCurrency: { name: "SepoliaETH", symbol: "SepoliaETH", decimals: 18 },
+                  blockExplorerUrls: ["https://sepolia.etherscan.io"],
+                },
+              ],
+            });
+          } catch {
+            alert("Failed to add Sepolia network to MetaMask.");
+            setUploading(false);
+            return;
+          }
+        } else {
+          alert("Please switch your MetaMask network to Sepolia.");
+          setUploading(false);
+          return;
+        }
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      if (!projectName || !location || !startDate || !endDate || !budget || !file || signatories.length === 0) {
+        alert("Please fill all fields and add at least one signatory.");
+        setUploading(false);
+        return;
+      }
+
+      // Upload proposal file
+      const proposalUrl = await uploadFileToPinata();
+
+      // Mint NFT
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+      const tx = await contract.createProjectNft(
+        projectName,
+        location,
+        budget,
+        signatories.map((s) => s.contractAddress),
+        dateToString(startDate),
+        dateToString(endDate),
+        proposalUrl,
+        NFT_IMAGE_URL
+      );
+      await tx.wait();
+
+      // Save to MongoDB
       const payload = {
         projectName,
         location,
-        startDate: startDateStr,
-        endDate: endDateStr,
+        startDate: dateToString(startDate),
+        endDate: dateToString(endDate),
         budget,
-        proposal: fileName,
-        signatories: signatories.map((s) => s.contractAddress), // only addresses
+        proposal: proposalUrl,
+        signatories: signatories.map((s) => s.contractAddress),
+        image: NFT_IMAGE_URL,
       };
 
       const res = await fetch("/api/project/post", {
@@ -191,21 +265,29 @@ export default function ModalCreate() {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`Error: ${res.statusText}`);
-      const data = await res.json();
-      console.log("Project created:", data);
-      onClose();
+      if (!res.ok) throw new Error("Failed to save project in database");
+
+      addToast({
+        title: "Project Added & NFT Minted!",
+        description: "Transaction successful!",
+        color: "success",
+      });
+
       // Reset form
       setProjectName("");
       setLocation("");
       setStartDate(null);
       setEndDate(null);
       setBudget(0);
+      setFile(null);
       setFileName("");
       setSignatories([]);
-    } catch (err) {
+      onClose();
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to create project. Check console for details.");
+      alert("Error creating project: " + (err.message || ""));
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -215,13 +297,7 @@ export default function ModalCreate() {
         Add Project
       </Button>
 
-      <Modal
-        isOpen={isOpen}
-        size="lg"
-        onClose={onClose}
-        isDismissable={false}
-        isKeyboardDismissDisabled
-      >
+      <Modal isOpen={isOpen} size="lg" onClose={onClose}>
         <ModalContent>
           {(onClose) => (
             <>
@@ -229,41 +305,35 @@ export default function ModalCreate() {
               <ModalBody className="space-y-4">
                 <Input
                   label="Project Name"
-                  type="text"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                 />
                 <Input
                   label="Location"
-                  type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 />
                 <DatePicker
-                  showMonthAndYearPickers
-                  className="w-full"
                   label="Start Date"
                   value={startDate}
                   onChange={setStartDate}
                 />
                 <DatePicker
-                  showMonthAndYearPickers
-                  className="w-full"
                   label="End Date"
                   value={endDate}
                   onChange={setEndDate}
                 />
                 <NumberInput
                   label="Budget"
-                  placeholder="Enter the Budget"
                   value={budget}
                   onValueChange={(v) => setBudget(v)}
                 />
 
-                {/* File Upload */}
                 <div className="flex flex-col gap-2">
                   {fileName && <span className="text-sm text-gray-600">Selected: {fileName}</span>}
-                  <Button onPress={openFileDialog}>Upload Proposal File</Button>
+                  <Button onPress={() => fileInputRef.current?.click()} disabled={uploading}>
+                    {uploading ? "Uploading..." : "Upload Proposal File"}
+                  </Button>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -272,7 +342,6 @@ export default function ModalCreate() {
                   />
                 </div>
 
-                {/* Signatories Section */}
                 <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
                   {signatories.map((s) => (
                     <div key={s.id} className="flex justify-between items-center p-2">
@@ -294,8 +363,8 @@ export default function ModalCreate() {
                 <Button variant="light" color="danger" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={handleSave}>
-                  Save
+                <Button color="primary" onPress={handleSave} disabled={uploading}>
+                  {uploading ? "Processing..." : "Save"}
                 </Button>
               </ModalFooter>
             </>
@@ -303,7 +372,6 @@ export default function ModalCreate() {
         </ModalContent>
       </Modal>
 
-      {/* Child Modal */}
       <SelectSignatoryModal
         isOpen={selectModalOpen}
         onClose={() => setSelectModalOpen(false)}
