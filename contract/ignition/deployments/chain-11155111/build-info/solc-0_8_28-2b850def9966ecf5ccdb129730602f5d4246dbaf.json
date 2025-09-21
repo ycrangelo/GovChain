@@ -1,6 +1,6 @@
 {
   "_format": "hh3-sol-build-info-1",
-  "id": "solc-0_8_28-990a977726b23f267c2cbd40de3b3e67ccb6f814",
+  "id": "solc-0_8_28-2b850def9966ecf5ccdb129730602f5d4246dbaf",
   "solcVersion": "0.8.28",
   "solcLongVersion": "0.8.28+commit.7893614a",
   "userSourceNameMap": {
@@ -30,7 +30,8 @@
       },
       "remappings": [
         "project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.4.0/"
-      ]
+      ],
+      "viaIR": true
     },
     "sources": {
       "npm/@openzeppelin/contracts@5.4.0/token/ERC20/IERC20.sol": {

@@ -1,5 +1,3 @@
 {
-  "TokenModule#GovToken": "0x6e4A757459c24059A237434f36a610A96f7146EA",
-  "ProjectsModule#Projects": "0x88500d62c57bc0809EAfC11ed5125ed8d19fFF86",
-  "VotingModule#Voting": "0xDEF0931B17ad0C065c41023Ef42F645877887E8c"
+  "VotingModule#Voting": "0x1A07f55Ea2d9cb30679455c08e1830518f64326C"
 }
