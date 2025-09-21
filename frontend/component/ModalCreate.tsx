@@ -15,6 +15,7 @@ import { NumberInput } from "@heroui/number-input";
 import { DatePicker } from "@heroui/date-picker";
 import { CheckboxGroup, Checkbox } from "@heroui/checkbox";
 import { addToast } from "@heroui/toast";
+import { pinata } from "@/utils/config";
 
 // --- Types ---
 interface Signatory {
@@ -124,12 +125,20 @@ export default function ModalCreate() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Projects contract
   const CONTRACT_ADDRESS = "0x3E1623c2F0B9CB1f1558b4B126f0458792Bc8009";
   const CONTRACT_ABI = [
     "function createProjectNft(string _name,string _location,uint256 _budget,address[] _signatories,string _timelineStart,string _timelineEnd,string _proposalLink,string _image) external",
   ];
 
-  const NFT_IMAGE_URL = "https://cyan-additional-crab-497.mypinata.cloud/ipfs/bafkreigehgu5ijanavgtfswcedcpablrv3kqjf575zdqsn467qps3puq6a";
+  // Voting contract
+  const VOTING_CONTRACT_ADDRESS = "0x1A07f55Ea2d9cb30679455c08e1830518f64326C";
+  const VOTING_CONTRACT_ABI = [
+    "function createVoteSession(uint256 _projectId, address[] calldata _eligibleVoters) external",
+  ];
+
+  const NFT_IMAGE_URL =
+    "https://cyan-additional-crab-497.mypinata.cloud/ipfs/bafkreigehgu5ijanavgtfswcedcpablrv3kqjf575zdqsn467qps3puq6a";
 
   const removeSignatory = (id: string) => {
     setSignatories((prev) => prev.filter((s) => s.id !== id));
@@ -155,25 +164,26 @@ export default function ModalCreate() {
   };
 
   const uploadFileToPinata = async () => {
-    if (!file) throw new Error("No file selected");
+    if (!file) {
+      alert("No file selected");
+      return;
+    }
 
-    const res = await fetch("/api/url");
-    if (!res.ok) throw new Error("Failed to get signed URL");
-    const { url } = await res.json();
+    try {
+      setUploading(true);
 
-    const formData = new FormData();
-    formData.append("file", file);
+      const urlRequest = await fetch("/api/url");
+      const urlResponse = await urlRequest.json();
 
-    const uploadRes = await fetch(url, {
-      method: "POST",
-      body: formData,
-    });
+      const upload = await pinata.upload.public.file(file).url(urlResponse.url);
+      const cid = upload.cid;
 
-    if (!uploadRes.ok) throw new Error("Failed to upload file to Pinata");
-
-    const data = await uploadRes.json();
-    const cid = data.cid || data.IpfsHash;
-    return `https://gateway.pinata.cloud/ipfs/${cid}`;
+      return `https://gateway.pinata.cloud/ipfs/${cid}`;
+    } catch (e) {
+      console.error(e);
+      alert("Trouble uploading file");
+    } finally {
+    }
   };
 
   const handleSave = async () => {
@@ -189,53 +199,34 @@ export default function ModalCreate() {
       const { ethers } = await import("ethers");
 
       // Switch to Sepolia
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xaa36a7" }],
-        });
-      } catch (switchError: any) {
-        if (switchError.code === 4902) {
-          try {
-            await window.ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [
-                {
-                  chainId: "0xaa36a7",
-                  chainName: "Sepolia Testnet",
-                  rpcUrls: ["https://sepolia.infura.io/v3/YOUR_INFURA_KEY"],
-                  nativeCurrency: { name: "SepoliaETH", symbol: "SepoliaETH", decimals: 18 },
-                  blockExplorerUrls: ["https://sepolia.etherscan.io"],
-                },
-              ],
-            });
-          } catch {
-            alert("Failed to add Sepolia network to MetaMask.");
-            setUploading(false);
-            return;
-          }
-        } else {
-          alert("Please switch your MetaMask network to Sepolia.");
-          setUploading(false);
-          return;
-        }
-      }
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xaa36a7" }],
+      });
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
 
-      if (!projectName || !location || !startDate || !endDate || !budget || !file || signatories.length === 0) {
+      if (
+        !projectName ||
+        !location ||
+        !startDate ||
+        !endDate ||
+        !budget ||
+        !file ||
+        signatories.length === 0
+      ) {
         alert("Please fill all fields and add at least one signatory.");
         setUploading(false);
         return;
       }
 
-      // Upload proposal file
+      // Upload file
       const proposalUrl = await uploadFileToPinata();
 
       // Mint NFT
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      const tx = await contract.createProjectNft(
+      const projectContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+      const tx = await projectContract.createProjectNft(
         projectName,
         location,
         budget,
@@ -247,7 +238,7 @@ export default function ModalCreate() {
       );
       await tx.wait();
 
-      // Save to MongoDB
+      // Save project in MongoDB
       const payload = {
         projectName,
         location,
@@ -267,13 +258,31 @@ export default function ModalCreate() {
 
       if (!res.ok) throw new Error("Failed to save project in database");
 
+      // Get count from MongoDB → determine projectId
+      const countRes = await fetch("/api/project/get");
+      const { count } = await countRes.json();
+      const projectId = count; // new projectId
+
+      // Call Voting contract to create vote session
+      const votingContract = new ethers.Contract(
+        VOTING_CONTRACT_ADDRESS,
+        VOTING_CONTRACT_ABI,
+        signer
+      );
+
+      const voteTx = await votingContract.createVoteSession(
+        projectId,
+        signatories.map((s) => s.contractAddress)
+      );
+      await voteTx.wait();
+
       addToast({
-        title: "Project Added & NFT Minted!",
+        title: "Project Added, NFT Minted & Voting Session Created!",
         description: "Transaction successful!",
         color: "success",
       });
 
-      // Reset form
+      // Reset
       setProjectName("");
       setLocation("");
       setStartDate(null);
@@ -330,8 +339,15 @@ export default function ModalCreate() {
                 />
 
                 <div className="flex flex-col gap-2">
-                  {fileName && <span className="text-sm text-gray-600">Selected: {fileName}</span>}
-                  <Button onPress={() => fileInputRef.current?.click()} disabled={uploading}>
+                  {fileName && (
+                    <span className="text-sm text-gray-600">
+                      Selected: {fileName}
+                    </span>
+                  )}
+                  <Button
+                    onPress={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
                     {uploading ? "Uploading..." : "Upload Proposal File"}
                   </Button>
                   <input
@@ -344,17 +360,29 @@ export default function ModalCreate() {
 
                 <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
                   {signatories.map((s) => (
-                    <div key={s.id} className="flex justify-between items-center p-2">
+                    <div
+                      key={s.id}
+                      className="flex justify-between items-center p-2"
+                    >
                       <div>
                         {s.name} ({s.position})
-                        <div className="text-sm font-mono text-gray-500">{s.contractAddress}</div>
+                        <div className="text-sm font-mono text-gray-500">
+                          {s.contractAddress}
+                        </div>
                       </div>
-                      <Button color="danger" size="sm" onPress={() => removeSignatory(s.id)}>
+                      <Button
+                        color="danger"
+                        size="sm"
+                        onPress={() => removeSignatory(s.id)}
+                      >
                         Remove
                       </Button>
                     </div>
                   ))}
-                  <Button color="primary" onPress={() => setSelectModalOpen(true)}>
+                  <Button
+                    color="primary"
+                    onPress={() => setSelectModalOpen(true)}
+                  >
                     Add Signatory
                   </Button>
                 </div>
@@ -363,7 +391,11 @@ export default function ModalCreate() {
                 <Button variant="light" color="danger" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={handleSave} disabled={uploading}>
+                <Button
+                  color="primary"
+                  onPress={handleSave}
+                  disabled={uploading}
+                >
                   {uploading ? "Processing..." : "Save"}
                 </Button>
               </ModalFooter>
@@ -375,7 +407,9 @@ export default function ModalCreate() {
       <SelectSignatoryModal
         isOpen={selectModalOpen}
         onClose={() => setSelectModalOpen(false)}
-        onSelect={(selected) => setSignatories((prev) => [...prev, ...selected])}
+        onSelect={(selected) =>
+          setSignatories((prev) => [...prev, ...selected])
+        }
         existingIds={signatories.map((s) => s.id)}
       />
     </>

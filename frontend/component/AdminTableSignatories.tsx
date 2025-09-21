@@ -24,23 +24,30 @@ interface Signatory {
 export default function SignatoriesTable() {
   const [signatories, setSignatories] = useState<Signatory[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true); // only for first load
 
   useEffect(() => {
-    fetchSignatories();
+    fetchSignatories(true); // first fetch → show loader
+
+    const interval = setInterval(() => {
+      fetchSignatories(false); // silent fetch (no loader)
+    }, 6000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchSignatories = async () => {
-    setLoading(true);
+  const fetchSignatories = async (showLoading = true) => {
+    if (showLoading) setInitialLoading(true);
+
     try {
-      const res = await fetch("/api/approver/get");
+      const res = await fetch("/api/approver/get", { cache: "no-store" });
       if (!res.ok) throw new Error("Failed to fetch signatories");
       const data: Signatory[] = await res.json();
       setSignatories(data);
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (showLoading) setInitialLoading(false);
     }
   };
 
@@ -75,13 +82,13 @@ export default function SignatoriesTable() {
         prev.map((s) => (s.id === id ? { ...s, status: updatedApprover.status } : s))
       );
 
-      
       addToast({
         title: "Status Updated",
-        description: `Status for ${updatedApprover.name} is now ${updatedApprover.status === 1 ? "Active" : "Inactive"}.`,
+        description: `Status for ${updatedApprover.name} is now ${
+          updatedApprover.status === 1 ? "Active" : "Inactive"
+        }.`,
         color: "success",
       });
-
     } catch (err) {
       console.error(err);
       addToast({
@@ -92,10 +99,14 @@ export default function SignatoriesTable() {
     }
   };
 
-  if (loading) return <div className="p-4 text-center">Loading signatories...</div>;
-
   return (
-    <div className="mt-7 overflow-x-auto">
+    <div className="mt-7 overflow-x-auto relative">
+      {initialLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10">
+          <span className="animate-pulse text-gray-500">Loading signatories...</span>
+        </div>
+      )}
+
       <Table aria-label="Signatories table" className="min-w-full">
         <TableHeader>
           <TableColumn className="text-left">NAME</TableColumn>
@@ -133,7 +144,11 @@ export default function SignatoriesTable() {
                 {item.status === 1 ? "Active" : "Inactive"}
               </TableCell>
               <TableCell className="text-center">
-                <Button color="warning" size="sm" onClick={() => handleChangeStatus(item.id)}>
+                <Button
+                  color="warning"
+                  size="sm"
+                  onClick={() => handleChangeStatus(item.id)}
+                >
                   Change Status
                 </Button>
               </TableCell>
