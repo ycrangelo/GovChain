@@ -126,15 +126,15 @@ export default function ModalCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Projects contract
-  const CONTRACT_ADDRESS = "0x3E1623c2F0B9CB1f1558b4B126f0458792Bc8009";
+  const CONTRACT_ADDRESS = "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
   const CONTRACT_ABI = [
     "function createProjectNft(string _name,string _location,uint256 _budget,address[] _signatories,string _timelineStart,string _timelineEnd,string _proposalLink,string _image) external",
   ];
 
   // Voting contract
-  const VOTING_CONTRACT_ADDRESS = "0x1A07f55Ea2d9cb30679455c08e1830518f64326C";
+  const VOTING_CONTRACT_ADDRESS = "0xdbAa9146698899C3f512ab70ad68B0A89C452971";
   const VOTING_CONTRACT_ABI = [
-    "function createVoteSession(uint256 _projectId, address[] calldata _eligibleVoters) external",
+    "function createVoteSession(uint256 _projectId, address[] calldata _eligibleVoters) external", 
   ];
 
   const NFT_IMAGE_URL =

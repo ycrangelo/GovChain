@@ -148,6 +148,31 @@ contract Projects is ERC721 {
         return string(abi.encodePacked("data:application/json;base64,", json));
     }
 
+    function getProject(uint256 _id) public view returns (
+                uint256,
+                string memory,
+                string memory,
+                uint256,
+                address[] memory,
+                string memory,
+                string memory,
+                Status,
+                string memory
+            ) {
+                Project storage p = projects[_id];
+                return (
+                    p.projectId,
+                    p.projectName,
+                    p.location,
+                    p.budgetPeso,
+                    p.signatories,
+                    p.timelineStart,
+                    p.timelineEnd,
+                    p.status,
+                    p.proposalLink
+                );
+            }
+
     // Helper to convert Status enum to string
     function _statusToString(Status _status) internal pure returns (string memory) {
         if (_status == Status.Pending) return "Pending";
