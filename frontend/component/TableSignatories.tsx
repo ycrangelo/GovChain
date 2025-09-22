@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
 import {
   Table,
@@ -10,24 +10,53 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/table";
-import { Copy, Check } from "lucide-react"; // ✅ icon import
+import { Copy, Check } from "lucide-react"; 
+import { addToast } from "@heroui/toast"; 
+
+interface Signatory {
+  id: string;
+  name: string;
+  position: string;
+  contractAddress: string;
+  status: number;
+}
 
 export default function SignatoriesTable() {
-  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [signatories, setSignatories] = useState<Signatory[]>([]);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true); // only for first load
 
-  const signatories = [
-    { id: 1, name: "Tony Reichert", role: "CEO", status: "Active", address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e" },
-    { id: 2, name: "Zoey Lang", role: "Technical Lead", status: "Not Active", address: "0x4E9ce36E442e55EcD9025B9a6E0D88485d628A67" },
-    { id: 3, name: "Jane Fisher", role: "Senior Developer", status: "Active", address: "0x281055afc982d96FAB65b3a49c7BB7a0bC07b2b9" },
-    { id: 4, name: "William Howard", role: "Community Manager", status: "Not acitve", address: "0x53d284357ec70cE289D6D64134DfAc8E511c8a3D" },
-  ];
+  useEffect(() => {
+    fetchSignatories(true); // first fetch → show loader
+
+    const interval = setInterval(() => {
+      fetchSignatories(false); // silent fetch (no loader)
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchSignatories = async (showLoading = true) => {
+    if (showLoading) setInitialLoading(true);
+
+    try {
+      const res = await fetch("/api/approver/get", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to fetch signatories");
+      const data: Signatory[] = await res.json();
+      setSignatories(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (showLoading) setInitialLoading(false);
+    }
+  };
 
   const truncateAddress = (addr: string) => {
     if (!addr) return "";
-    return addr.length > 4 ? `${addr.slice(0, 10)}....${addr.slice(-4)}` : addr;
+    return addr.length > 10 ? `${addr.slice(0, 10)}....${addr.slice(-4)}` : addr;
   };
 
-  const handleCopy = async (id: number, address: string) => {
+  const handleCopy = async (id: string, address: string) => {
     try {
       await navigator.clipboard.writeText(address);
       setCopiedId(id);
@@ -38,28 +67,36 @@ export default function SignatoriesTable() {
   };
 
   return (
-    <div className="mt-7">
-      <Table aria-label="Signatories table">
+    <div className="mt-7 overflow-x-auto relative">
+      {initialLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10">
+          <span className="animate-pulse text-gray-500">Loading signatories...</span>
+        </div>
+      )}
+
+      <Table aria-label="Signatories table" className="min-w-full">
         <TableHeader>
-          <TableColumn key="name">NAME</TableColumn>
-          <TableColumn key="role">ROLE</TableColumn>
-          <TableColumn key="address">ADDRESS</TableColumn>
-          <TableColumn key="status">STATUS</TableColumn>
+          <TableColumn className="text-left">NAME</TableColumn>
+          <TableColumn className="text-left">POSITION</TableColumn>
+          <TableColumn className="text-left">ADDRESS</TableColumn>
+          <TableColumn className="text-center">STATUS</TableColumn>
         </TableHeader>
 
         <TableBody>
           {signatories.map((item) => (
             <TableRow key={item.id}>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.role}</TableCell>
-              <TableCell>
+              <TableCell className="text-left font-medium">{item.name}</TableCell>
+              <TableCell className="text-left">{item.position}</TableCell>
+              <TableCell className="text-left">
                 <div className="flex items-center gap-2 font-mono">
-                  <span title={item.address}>{truncateAddress(item.address)}</span>
+                  <span title={item.contractAddress} className="truncate max-w-[180px]">
+                    {truncateAddress(item.contractAddress)}
+                  </span>
                   <Button
                     isIconOnly
                     variant="light"
                     size="sm"
-                    onClick={() => handleCopy(item.id, item.address)}
+                    onClick={() => handleCopy(item.id, item.contractAddress)}
                   >
                     {copiedId === item.id ? (
                       <Check className="w-4 h-4 text-green-500" />
@@ -69,7 +106,9 @@ export default function SignatoriesTable() {
                   </Button>
                 </div>
               </TableCell>
-              <TableCell>{item.status}</TableCell>
+              <TableCell className="text-center font-semibold">
+                {item.status === 1 ? "Active" : "Inactive"}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
