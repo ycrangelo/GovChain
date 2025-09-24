@@ -2,16 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableColumn,
-  TableRow,
-  TableCell,
-} from "@heroui/table";
-import { Copy, Check } from "lucide-react"; 
-import { addToast } from "@heroui/toast"; 
+import { Copy, Check } from "lucide-react";
+import { addToast } from "@heroui/toast";
 
 interface Signatory {
   id: string;
@@ -21,16 +13,16 @@ interface Signatory {
   status: number;
 }
 
-export default function SignatoriesTable() {
+export default function AdminTableSignatories() {
   const [signatories, setSignatories] = useState<Signatory[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [initialLoading, setInitialLoading] = useState(true); // only for first load
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
-    fetchSignatories(true); // first fetch → show loader
+    fetchSignatories(true);
 
     const interval = setInterval(() => {
-      fetchSignatories(false); // silent fetch (no loader)
+      fetchSignatories(false);
     }, 6000);
 
     return () => clearInterval(interval);
@@ -51,16 +43,14 @@ export default function SignatoriesTable() {
     }
   };
 
-  const truncateAddress = (addr: string) => {
-    if (!addr) return "";
-    return addr.length > 10 ? `${addr.slice(0, 10)}....${addr.slice(-4)}` : addr;
-  };
-
   const handleCopy = async (id: string, address: string) => {
     try {
       await navigator.clipboard.writeText(address);
       setCopiedId(id);
-      setTimeout(() => setCopiedId((prev) => (prev === id ? null : prev)), 1500);
+      setTimeout(
+        () => setCopiedId((prev) => (prev === id ? null : prev)),
+        1500
+      );
     } catch (err) {
       console.error("Copy failed", err);
     }
@@ -79,7 +69,9 @@ export default function SignatoriesTable() {
       const updatedApprover: Signatory = await res.json();
 
       setSignatories((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, status: updatedApprover.status } : s))
+        prev.map((s) =>
+          s.id === id ? { ...s, status: updatedApprover.status } : s
+        )
       );
 
       addToast({
@@ -100,62 +92,64 @@ export default function SignatoriesTable() {
   };
 
   return (
-    <div className="mt-7 overflow-x-auto relative">
-      {initialLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10">
-          <span className="animate-pulse text-gray-500">Loading signatories...</span>
-        </div>
-      )}
-
-      <Table aria-label="Signatories table" className="min-w-full">
-        <TableHeader>
-          <TableColumn className="text-left">NAME</TableColumn>
-          <TableColumn className="text-left">POSITION</TableColumn>
-          <TableColumn className="text-left">ADDRESS</TableColumn>
-          <TableColumn className="text-center">STATUS</TableColumn>
-          <TableColumn className="text-center">ACTION</TableColumn>
-        </TableHeader>
-
-        <TableBody>
-          {signatories.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell className="text-left font-medium">{item.name}</TableCell>
-              <TableCell className="text-left">{item.position}</TableCell>
-              <TableCell className="text-left">
-                <div className="flex items-center gap-2 font-mono">
-                  <span title={item.contractAddress} className="truncate max-w-[180px]">
-                    {truncateAddress(item.contractAddress)}
-                  </span>
-                  <Button
-                    isIconOnly
-                    variant="light"
-                    size="sm"
-                    onClick={() => handleCopy(item.id, item.contractAddress)}
-                  >
-                    {copiedId === item.id ? (
-                      <Check className="w-4 h-4 text-green-500" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </TableCell>
-              <TableCell className="text-center font-semibold">
-                {item.status === 1 ? "Active" : "Inactive"}
-              </TableCell>
-              <TableCell className="text-center">
-                <Button
-                  color="warning"
-                  size="sm"
-                  onClick={() => handleChangeStatus(item.id)}
-                >
-                  Change Status
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+ <div className="mt-7 relative">
+  {initialLoading && (
+    <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
+      <span className="animate-pulse text-gray-300">
+        Loading signatories...
+      </span>
     </div>
+  )}
+
+  {/* Grid instead of flex-col */}
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full p-4">
+  {signatories.map((item) => (
+    <div
+      key={item.id}
+      className="relative flex flex-col border border-gray-700 rounded-2xl px-6 py-5 shadow-lg bg-transparent"
+    >
+      {/* Copy button - top right */}
+      <button
+        onClick={() => handleCopy(item.id, item.contractAddress)}
+        className="absolute top-3 right-3 p-1 rounded-md hover:bg-gray-800"
+      >
+        {copiedId === item.id ? (
+          <Check className="w-4 h-4 text-green-500" />
+        ) : (
+          <Copy className="w-4 h-4 text-white" />
+        )}
+      </button>
+
+      {/* Details */}
+      <div className="flex flex-col gap-1 pr-16"> 
+        <h3 className="text-xl font-bold text-white">{item.name || "—"}</h3>
+        <p className="text-sm text-gray-300">{item.position || "—"}</p>
+        <p className="font-mono text-sm text-gray-400 break-all">
+          {item.contractAddress || "—"}
+        </p>
+        <span
+          className={`mt-1 text-sm font-semibold ${
+            item.status === 1 ? "text-green-400" : "text-red-400"
+          }`}
+        >
+          {item.status === 1 ? "Active" : "Inactive"}
+        </span>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2 mt-4">
+        <Button
+          size="sm"
+          className="bg-transparent border border-white text-white hover:bg-white hover:text-black"
+          onClick={() => handleChangeStatus(item.id)}
+        >
+          {item.status === 1 ? "Deactivate" : "Activate"}
+        </Button>
+      </div>
+    </div>
+  ))}
+</div>
+
+</div>
   );
 }

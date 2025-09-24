@@ -2,16 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableColumn,
-  TableRow,
-  TableCell,
-} from "@heroui/table";
-import { Copy, Check } from "lucide-react"; 
-import { addToast } from "@heroui/toast"; 
+import { Copy, Check } from "lucide-react";
 
 interface Signatory {
   id: string;
@@ -21,16 +12,16 @@ interface Signatory {
   status: number;
 }
 
-export default function SignatoriesTable() {
+export default function SignatoriesGrid() {
   const [signatories, setSignatories] = useState<Signatory[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [initialLoading, setInitialLoading] = useState(true); // only for first load
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
-    fetchSignatories(true); // first fetch → show loader
+    fetchSignatories(true);
 
     const interval = setInterval(() => {
-      fetchSignatories(false); // silent fetch (no loader)
+      fetchSignatories(false);
     }, 6000);
 
     return () => clearInterval(interval);
@@ -51,11 +42,6 @@ export default function SignatoriesTable() {
     }
   };
 
-  const truncateAddress = (addr: string) => {
-    if (!addr) return "";
-    return addr.length > 10 ? `${addr.slice(0, 10)}....${addr.slice(-4)}` : addr;
-  };
-
   const handleCopy = async (id: string, address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -67,31 +53,39 @@ export default function SignatoriesTable() {
   };
 
   return (
-    <div className="mt-7 overflow-x-auto relative">
+    <div className="mt-7 relative">
       {initialLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10">
-          <span className="animate-pulse text-gray-500">Loading signatories...</span>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
+          <span className="animate-pulse text-gray-300">Loading signatories...</span>
         </div>
       )}
 
-      <Table aria-label="Signatories table" className="min-w-full">
-        <TableHeader>
-          <TableColumn className="text-left">NAME</TableColumn>
-          <TableColumn className="text-left">POSITION</TableColumn>
-          <TableColumn className="text-left">ADDRESS</TableColumn>
-          <TableColumn className="text-center">STATUS</TableColumn>
-        </TableHeader>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {signatories.map((item) => (
+          <div
+            key={item.id}
+            className="p-4 rounded-2xl border border-gray-700 flex flex-col gap-3 bg-transparent"
+          >
+            {/* Name */}
+            <div>
+              <p className="text-xs text-gray-400">Name</p>
+              <h3 className="text-lg font-bold text-white">{item.name || "—"}</h3>
+            </div>
 
-        <TableBody>
-          {signatories.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell className="text-left font-medium">{item.name}</TableCell>
-              <TableCell className="text-left">{item.position}</TableCell>
-              <TableCell className="text-left">
-                <div className="flex items-center gap-2 font-mono">
-                  <span title={item.contractAddress} className="truncate max-w-[180px]">
-                    {truncateAddress(item.contractAddress)}
-                  </span>
+            {/* Position */}
+            <div>
+              <p className="text-xs text-gray-400">Position</p>
+              <p className="text-sm text-white">{item.position || "—"}</p>
+            </div>
+
+            {/* Address */}
+            <div>
+              <p className="text-xs text-gray-400">Address</p>
+              <div className="flex items-center gap-2 font-mono text-sm text-white break-all">
+                <span title={item.contractAddress}>
+                  {item.contractAddress || "—"}
+                </span>
+                {item.contractAddress && (
                   <Button
                     isIconOnly
                     variant="light"
@@ -101,18 +95,27 @@ export default function SignatoriesTable() {
                     {copiedId === item.id ? (
                       <Check className="w-4 h-4 text-green-500" />
                     ) : (
-                      <Copy className="w-4 h-4" />
+                      <Copy className="w-4 h-4 text-white" />
                     )}
                   </Button>
-                </div>
-              </TableCell>
-              <TableCell className="text-center font-semibold">
+                )}
+              </div>
+            </div>
+
+            {/* Status */}
+            <div>
+              <p className="text-xs text-gray-400">Status</p>
+              <span
+                className={`text-sm font-semibold ${
+                  item.status === 1 ? "text-green-400" : "text-red-400"
+                }`}
+              >
                 {item.status === 1 ? "Active" : "Inactive"}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -12,11 +12,16 @@ import {
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { addToast } from "@heroui/toast";
+import { ethers } from "ethers";
+
+const CONTRACT_ADDRESS = "0x6e4A757459c24059A237434f36a610A96f7146EA"; 
+const CONTRACT_ABI = [
+  "function addApprovers(address[] _approverAddress) public",
+];
 
 export default function ModalAddApprover() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // form states
   const [name, setName] = useState("");
   const [position, setPosition] = useState("");
   const [contractAddress, setContractAddress] = useState("");
@@ -35,6 +40,38 @@ export default function ModalAddApprover() {
     setLoading(true);
 
     try {
+      // ✅ Check kung may MetaMask
+      if (!(window as any).ethereum) {
+        alert("MetaMask is not installed!");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Switch to Sepolia (chainId: 0xaa36a7)
+      await (window as any).ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xaa36a7" }],
+      });
+
+      // ✅ Ethers provider + signer
+      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      const signer = await provider.getSigner();
+
+      // ✅ Init contract
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+      // ✅ Send tx to blockchain
+      const tx = await contract.addApprovers([contractAddress]);
+
+      addToast({
+        title: "Transaction Sent",
+        description: "Waiting for confirmation on-chain...",
+        color: "warning",
+      });
+
+      await tx.wait();
+
+      // ✅ Save approver to DB after chain success
       const res = await fetch("/api/approver/post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -47,27 +84,26 @@ export default function ModalAddApprover() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || "Failed to save approver");
+        throw new Error(error.error || "Failed to save approver in DB");
       }
 
       const data = await res.json();
-      console.log("✅ Approver saved:", data);
+      console.log("✅ Approver saved in DB:", data);
 
-      // Show success toast OUTSIDE modal
       addToast({
         title: "Approver Added",
         description: `${name} has been successfully added.`,
         color: "success",
       });
 
-      // clear inputs after success
+      // Clear inputs
       setName("");
       setPosition("");
       setContractAddress("");
 
       onClose();
     } catch (err: any) {
-      console.error("❌ Error saving approver:", err.message);
+      console.error("❌ Error:", err.message);
       addToast({
         title: "Error",
         description: err.message || "Something went wrong.",
@@ -81,7 +117,9 @@ export default function ModalAddApprover() {
   return (
     <>
       <div className="flex flex-wrap gap-3">
-        <Button color="success" onPress={onOpen}>Add Approver</Button>
+        <Button color="success" onPress={onOpen}>
+          Add Approver
+        </Button>
       </div>
       <Modal
         isOpen={isOpen}
@@ -91,7 +129,7 @@ export default function ModalAddApprover() {
         isKeyboardDismissDisabled={true}
       >
         <ModalContent>
-          {(onClose) => (
+          {() => (
             <>
               <ModalHeader className="flex flex-col gap-1">
                 Add Approver

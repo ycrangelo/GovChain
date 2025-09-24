@@ -12,11 +12,14 @@ const CONTRACT_ABI = [
 
 export default function ProjectsApprover() {
   const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // 1. Kunin count from Mongo API (pang-loop)
+        setLoading(true);
+
+        // 1. Get count from Mongo API
         const countRes = await fetch("/api/project/get");
         const { count } = await countRes.json();
 
@@ -45,6 +48,8 @@ export default function ProjectsApprover() {
         setProjects(tempProjects);
       } catch (err) {
         console.error("Error fetching projects:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -52,58 +57,72 @@ export default function ProjectsApprover() {
   }, []);
 
   const imageProject = process.env.NEXT_PUBLIC_NFT_IMAGE_URL;
-  console.log(`this is the image: ${imageProject}`)
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {projects.map((proj) => (
-        <div
-          key={proj.projectId}
-          className="rounded-2xl overflow-hidden flex flex-col border-1 p-4"
-        >
-          {/* Project Image */}
-          <Image
-            alt="Project Image"
-            src={imageProject}
-            width={400}
-            height={250}
-            className="object-cover w-full h-48"
-          />
+    <div className="relative mt-10">
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
+          <span className="animate-pulse text-gray-300">Loading projects...</span>
+        </div>
+      )}
 
-          {/* Project Info */}
-          <div className="p-4 flex flex-col flex-1">
-            <h2 className="text-xl font-bold mb-2  text-white">
-              {proj.projectName}
-            </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {projects.map((proj) => (
+          <div
+            key={proj.projectId}
+            className="rounded-2xl overflow-hidden flex flex-col border border-gray-700 p-4 bg-transparent"
+          >
+            {/* Project Image */}
+            {/* <Image
+              alt="Project Image"
+              src={imageProject}
+              width={400}
+              height={250}
+              className="object-cover w-full h-48 rounded-xl"
+            /> */}
 
-            <p className=" text-gray-400 mb-1">📍 {proj.location}</p>
+            {/* Project Info */}
+            <div className="p-4 flex flex-col flex-1">
+              <h2 className="text-xl font-bold mb-2 text-white">
+                {proj.projectName || "Unnamed Project"}
+              </h2>
 
-            <p className=" text-gray-400 mb-1">
-              ⏳ {proj.timelineStart} → {proj.timelineEnd}
-            </p>
+              <p className="text-gray-400 mb-1">📍 {proj.location || "No location"}</p>
 
-            {/* Spacer to push buttons down */}
-            <div className="flex-1" />
+              <p className="text-gray-400 mb-1">
+                ⏳ {proj.timelineStart || "—"} → {proj.timelineEnd || "—"}
+              </p>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4 mt-4">
-              <Button
-                variant="ghost"
-                className="text-gray-300 hover:text-gray-100 border"
-              >
-                View
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-gray-300 hover:text-gray-100 border"
-              >
-                Vote
-              </Button>
+              <p className="text-gray-400 mb-1">
+                💰 Budget:{" "}
+                <span className="text-white font-semibold">
+                  {proj.budgetPeso?.toLocaleString() || 0} PHP
+                </span>
+              </p>
+
+              {/* Spacer to push buttons down */}
+              <div className="flex-1" />
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 mt-4">
+                <Button
+                  variant="ghost"
+                  className="text-gray-300 hover:text-gray-100 border border-gray-700"
+                >
+                  View
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-gray-300 hover:text-gray-100 border border-gray-700"
+                >
+                  Vote
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

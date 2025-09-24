@@ -16,7 +16,7 @@ export default function signatoriesDashboard() {
   return (
     <div className="flex flex-col min-h-screen px-[12rem] bg-black text-white">
       {/* Search */}
-<div className="flex items-center justify-between mt-20">
+<div className="flex items-center justify-between mt-20 ">
   {/* Left - Back button */}
         <Link href={`/approver/dashboard/${account}`}>
           <Button color="danger">Back</Button>

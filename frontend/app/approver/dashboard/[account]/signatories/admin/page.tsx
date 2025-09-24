@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import AdminTableSignatories from "@/component/AdminTableSignatories";
 import ModalAddApprover from "@/component/ModalAddApprover";
+import DistributeTokenButton from "@/component/AddTokenApp";
 
 // type Props = {
 //   account: string;
@@ -29,7 +30,10 @@ export default function AdminSignatoriesDashboard() {
   </h1>
 
   {/* Right - placeholder (to balance flex) */}
-       <ModalAddApprover/>
+<div className="flex flex-row gap-3">
+         <ModalAddApprover/>
+    <DistributeTokenButton/>
+</div>
 </div>
       <AdminTableSignatories/>
     </div>
