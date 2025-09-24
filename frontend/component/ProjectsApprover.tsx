@@ -2,34 +2,55 @@
 
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { Image } from "@heroui/image";
 import { Button } from "@heroui/button";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@heroui/modal";
+import { addToast } from "@heroui/toast";
 
-const CONTRACT_ADDRESS = "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
-const CONTRACT_ABI = [
-  "function getProject(uint256 _id) view returns (uint256,string,string,uint256,address[],string,string,uint8,string)"
+// --- CONTRACTS --- //
+const PROJECT_CONTRACT_ADDRESS = "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
+const PROJECT_CONTRACT_ABI = [
+  "function getProject(uint256 _id) view returns (uint256,string,string,uint256,address[],string,string,uint8,string)",
 ];
+
+const VOTING_CONTRACT_ADDRESS = "0xdbAa9146698899C3f512ab70ad68B0A89C452971"; 
+const VOTING_CONTRACT_ABI = ["function vote(uint256 _projectId, bool approve) external"];
 
 export default function ProjectsApprover() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // for voting modal
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
+  const [txLoading, setTxLoading] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         setLoading(true);
 
-        // 1. Get count from Mongo API
+        // 1. Get count from API (Mongo or backend)
         const countRes = await fetch("/api/project/get");
         const { count } = await countRes.json();
 
-        // 2. Connect to Sepolia
+        // 2. Connect to Sepolia RPC
         const provider = new ethers.JsonRpcProvider(
           "https://sepolia.infura.io/v3/93ba4b7f4c7244d69db1f6d62490894b"
         );
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+        const contract = new ethers.Contract(
+          PROJECT_CONTRACT_ADDRESS,
+          PROJECT_CONTRACT_ABI,
+          provider
+        );
 
-        // 3. Loop fetch projects
+        // 3. Fetch projects one by one
         const tempProjects = [];
         for (let id = 1; id <= count; id++) {
           const p = await contract.getProject(id);
@@ -47,7 +68,7 @@ export default function ProjectsApprover() {
         }
         setProjects(tempProjects);
       } catch (err) {
-        console.error("Error fetching projects:", err);
+        console.error("❌ Error fetching projects:", err);
       } finally {
         setLoading(false);
       }
@@ -56,7 +77,61 @@ export default function ProjectsApprover() {
     fetchProjects();
   }, []);
 
-  const imageProject = process.env.NEXT_PUBLIC_NFT_IMAGE_URL;
+  // --- Vote handler --- //
+  const handleVote = async (approve: boolean) => {
+    if (!selectedProject) return;
+
+    try {
+      setTxLoading(true);
+
+      if (!(window as any).ethereum) {
+        alert("MetaMask is not installed!");
+        setTxLoading(false);
+        return;
+      }
+
+      // Switch to Sepolia
+      await (window as any).ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xaa36a7" }],
+      });
+
+      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        VOTING_CONTRACT_ADDRESS,
+        VOTING_CONTRACT_ABI,
+        signer
+      );
+
+      const tx = await contract.vote(selectedProject.projectId, approve);
+
+      addToast({
+        title: "Transaction Sent",
+        description: "Waiting for confirmation on-chain...",
+        color: "warning",
+      });
+
+      await tx.wait();
+
+      addToast({
+        title: "Vote Submitted",
+        description: `You voted ${approve ? "YES" : "NO"} on project ${selectedProject.projectName}`,
+        color: "success",
+      });
+
+      onClose();
+    } catch (err: any) {
+      console.error("❌ Error voting:", err.message);
+      addToast({
+        title: "Error",
+        description: err.message || "Failed to vote",
+        color: "danger",
+      });
+    } finally {
+      setTxLoading(false);
+    }
+  };
 
   return (
     <div className="relative mt-10">
@@ -67,21 +142,13 @@ export default function ProjectsApprover() {
         </div>
       )}
 
+      {/* Projects Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((proj) => (
           <div
             key={proj.projectId}
             className="rounded-2xl overflow-hidden flex flex-col border border-gray-700 p-4 bg-transparent"
           >
-            {/* Project Image */}
-            {/* <Image
-              alt="Project Image"
-              src={imageProject}
-              width={400}
-              height={250}
-              className="object-cover w-full h-48 rounded-xl"
-            /> */}
-
             {/* Project Info */}
             <div className="p-4 flex flex-col flex-1">
               <h2 className="text-xl font-bold mb-2 text-white">
@@ -101,7 +168,6 @@ export default function ProjectsApprover() {
                 </span>
               </p>
 
-              {/* Spacer to push buttons down */}
               <div className="flex-1" />
 
               {/* Action Buttons */}
@@ -115,6 +181,10 @@ export default function ProjectsApprover() {
                 <Button
                   variant="ghost"
                   className="text-gray-300 hover:text-gray-100 border border-gray-700"
+                  onClick={() => {
+                    setSelectedProject(proj);
+                    onOpen();
+                  }}
                 >
                   Vote
                 </Button>
@@ -123,6 +193,44 @@ export default function ProjectsApprover() {
           </div>
         ))}
       </div>
+
+      {/* Vote Modal */}
+      <Modal isOpen={isOpen} onClose={onClose} size="md">
+        <ModalContent>
+          {() => (
+            <>
+              <ModalHeader className="text-lg font-bold">
+                Vote on {selectedProject?.projectName}
+              </ModalHeader>
+              <ModalBody>
+                <p>Do you approve this project?</p>
+                <div className="flex gap-3">
+                  <Button
+                  color="success"
+                  isDisabled={txLoading}
+                  onPress={() => handleVote(true)}
+                >
+                  {txLoading ? "Voting..." : "Yes"}
+                </Button>
+                <Button
+                  color="danger"
+                  variant="light"
+                  isDisabled={txLoading}
+                  onPress={() => handleVote(false)}
+                >
+                  {txLoading ? "Voting..." : "No"}
+                </Button>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" onPress={onClose}>
+                  Cancel
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

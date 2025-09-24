@@ -149,7 +149,6 @@ export default function AdminTableSignatories() {
     </div>
   ))}
 </div>
-
 </div>
   );
 }
