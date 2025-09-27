@@ -12,6 +12,7 @@ import {
   FaBolt,
 } from "react-icons/fa";
 import { Button } from "@heroui/button";
+import Link from "next/link";
 export default function LandingPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -87,9 +88,11 @@ export default function LandingPage() {
           <p className="text-lg md:text-xl mt-4 mb-9">
             Immutable Records, Transparent Governance.
           </p>
+          <Link href={`/pblc/goverment/projects`}>
           <Button color="default" variant="flat" size="lg">
             Explore Projects
           </Button>
+          </Link>
         </div>
           {/* Down Arrow */}
   <div className="absolute bottom-12 animate-bounce">
@@ -239,19 +242,21 @@ export default function LandingPage() {
 <footer className="relative z-10 bg-black text-white px-4 py-12">
   <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
     {/* Links */}
-    <div className="flex flex-col md:flex-row gap-6 text-lg">
+    <div className="flex flex-col md:flex-row gap-6 text-lg  w-full justify-center">
       <a href="#about" className="hover:text-blue-400 transition">About</a>
       <a href="#Works" className="hover:text-blue-400 transition">How it Works</a>
       <a href="#Features" className="hover:text-blue-400 transition">Features</a>
-      <a href="#Projects" className="hover:text-blue-400 transition">Projects</a>
+          <Link href="/pblc/goverment/projects" className="hover:text-blue-400 transition">
+      Projects
+    </Link>
     </div>
 
     {/* Social / Community Links */}
-    <div className="flex gap-6 text-2xl">
+    {/* <div className="flex gap-6 text-2xl">
       <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-blue-400 transition">🐦</a>
       <a href="https://discord.com" target="_blank" rel="noreferrer" className="hover:text-blue-400 transition">💬</a>
       <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-blue-400 transition">🐙</a>
-    </div>
+    </div> */}
   </div>
 
   <p className="text-center mt-8 text-gray-400">
