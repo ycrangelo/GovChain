@@ -1,29 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { ethers } from "ethers";
 import { Button } from "@heroui/button";
 import { useSearchParams } from "next/navigation";
 
 // --- CONTRACTS --- //
-const PROJECT_CONTRACT_ADDRESS =
-  "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
+const PROJECT_CONTRACT_ADDRESS = "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
 const PROJECT_CONTRACT_ABI = [
   "function getProject(uint256 _id) view returns (uint256,string,string,uint256,address[],string,string,uint8,string)",
 ];
 
-export default function RejectedProjectView() {
+// Inner component that uses useSearchParams
+function RejectedProjectContent() {
   const [project, setProject] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [clientSide, setClientSide] = useState(false);
-
-  // This ensures we only use searchParams on the client side
-  useEffect(() => {
-    setClientSide(true);
-  }, []);
 
   const searchParams = useSearchParams();
-  const id = clientSide ? searchParams.get("id") : null;
+  const id = searchParams.get("id");
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -61,16 +55,10 @@ export default function RejectedProjectView() {
       }
     };
 
-    if (id) {
-      fetchProject();
-    } else if (clientSide) {
-      // If we're on client side but no ID, stop loading
-      setLoading(false);
-    }
-  }, [id, clientSide]);
+    fetchProject();
+  }, [id]);
 
-  // Show loading state during SSR and initial client render
-  if (!clientSide || loading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen text-gray-300">
         Loading project details...
@@ -78,7 +66,6 @@ export default function RejectedProjectView() {
     );
   }
 
-  // If no project found after loading
   if (!project) {
     return (
       <div className="flex items-center justify-center h-screen text-red-400">
@@ -167,5 +154,18 @@ export default function RejectedProjectView() {
         </p>
       </div>
     </div>
+  );
+}
+
+// Main component that wraps the content in Suspense
+export default function RejectedProjectView() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-screen text-gray-300">
+        Loading...
+      </div>
+    }>
+      <RejectedProjectContent />
+    </Suspense>
   );
 }
