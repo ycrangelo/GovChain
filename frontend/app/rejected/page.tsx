@@ -21,7 +21,7 @@ export default function RejectedProjects() {
       try {
         setLoading(true);
 
-        // 1. Get project count from backend
+        // 1. Get project count
         const countRes = await fetch("/api/project/get");
         const { count } = await countRes.json();
 
@@ -33,25 +33,25 @@ export default function RejectedProjects() {
           provider
         );
 
-        // 3. Fetch projects and filter rejected
-        const tempProjects = [];
-        for (let id = 1; id <= count; id++) {
-          const p = await contract.getProject(id);
-          // only rejected projects (status === 1)
-          if (Number(p[7]) === 1) {
-            tempProjects.push({
-              projectId: Number(p[0]),
-              projectName: p[1],
-              location: p[2],
-              budgetPeso: Number(p[3]),
-              signatories: p[4],
-              timelineStart: p[5],
-              timelineEnd: p[6],
-              status: Number(p[7]),
-              proposalLink: p[8],
-            });
-          }
-        }
+        // 3. Fetch projects in parallel
+        const projectsArray = await Promise.all(
+          Array.from({ length: count }, (_, i) => contract.getProject(i + 1))
+        );
+
+        // 4. Filter rejected
+        const tempProjects = projectsArray
+          .map((p: any) => ({
+            projectId: Number(p[0]),
+            projectName: p[1],
+            location: p[2],
+            budgetPeso: Number(p[3]),
+            signatories: p[4],
+            timelineStart: p[5],
+            timelineEnd: p[6],
+            status: Number(p[7]),
+            proposalLink: p[8],
+          }))
+          .filter((proj) => proj.status === 1);
 
         setProjects(tempProjects);
       } catch (err) {
@@ -65,7 +65,7 @@ export default function RejectedProjects() {
   }, []);
 
   return (
-    <div className="relative mt-10 flex flex-col items-center">
+    <div className="relative mt-6 flex flex-col items-center px-4 sm:px-6 lg:px-8">
       {/* Loading Overlay */}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
@@ -75,40 +75,39 @@ export default function RejectedProjects() {
         </div>
       )}
 
-      {/* Back Button (top right) */}
-      <div className="w-full max-w-6xl flex justify-end mb-6">
+      {/* Back Button */}
+      <div className="w-full max-w-6xl flex justify-end mb-4 sm:mb-6">
         <Button
           color="danger"
-          // variant="ghost"
           className="text-gray-300 hover:text-gray-100 border border-gray-700"
           onClick={() => window.history.back()}
+          size="sm"
         >
           Back
         </Button>
       </div>
 
-      {/* Projects Grid (centered) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full mx-auto">
+      {/* Projects Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl w-full">
         {projects.map((proj) => (
           <div
             key={proj.projectId}
             className="rounded-2xl overflow-hidden flex flex-col border border-gray-700 p-4 bg-transparent"
           >
-            {/* Project Info */}
-            <div className="p-4 flex flex-col flex-1">
-              <h2 className="text-xl font-bold mb-2 text-red-400">
+            <div className="p-2 sm:p-4 flex flex-col flex-1">
+              <h2 className="text-lg sm:text-xl font-bold mb-2 text-red-400 truncate">
                 {proj.projectName || "Unnamed Project"}
               </h2>
 
-              <p className="text-gray-400 mb-1">
+              <p className="text-gray-400 mb-1 text-sm sm:text-base">
                 📍 {proj.location || "No location"}
               </p>
 
-              <p className="text-gray-400 mb-1">
+              <p className="text-gray-400 mb-1 text-sm sm:text-base">
                 ⏳ {proj.timelineStart || "—"} → {proj.timelineEnd || "—"}
               </p>
 
-              <p className="text-gray-400 mb-1">
+              <p className="text-gray-400 mb-1 text-sm sm:text-base">
                 💰 Budget:{" "}
                 <span className="text-white font-semibold">
                   {proj.budgetPeso?.toLocaleString() || 0} PHP
@@ -122,10 +121,9 @@ export default function RejectedProjects() {
                 <Button
                   variant="ghost"
                   className="text-gray-300 hover:text-gray-100 border border-gray-700"
+                  size="sm"
                   onClick={() =>
-                    router.push(
-                      `/view?id=${proj.projectId}`
-                    )
+                    router.push(`/view?id=${proj.projectId}`)
                   }
                 >
                   View
@@ -135,6 +133,13 @@ export default function RejectedProjects() {
           </div>
         ))}
       </div>
+
+      {/* Empty State */}
+      {projects.length === 0 && !loading && (
+        <div className="text-gray-400 text-center mt-10 text-sm sm:text-base">
+          No rejected projects found.
+        </div>
+      )}
     </div>
   );
 }
