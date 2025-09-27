@@ -12,6 +12,7 @@ import {
   useDisclosure,
 } from "@heroui/modal";
 import { addToast } from "@heroui/toast";
+import { useRouter } from "next/navigation";
 
 // --- CONTRACTS --- //
 const PROJECT_CONTRACT_ADDRESS = "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
@@ -30,6 +31,7 @@ interface Props {
 export default function ProjectsApprover({ account, view }: Props) {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
   // for voting modal
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -208,6 +210,11 @@ export default function ProjectsApprover({ account, view }: Props) {
                 <Button
                   variant="ghost"
                   className="text-gray-300 hover:text-gray-100 border border-gray-700"
+                    onClick={() =>
+                    router.push(
+                      `/view?id=${proj.projectId}`
+                    )
+                  }
                 >
                   View
                 </Button>

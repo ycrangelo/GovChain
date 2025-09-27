@@ -89,7 +89,7 @@ export default function RejectedProjectView() {
 
       {/* Project Details Card */}
       <div className="rounded-2xl border border-gray-700 p-8 w-full max-w-4xl bg-black/40 shadow-lg">
-        <h1 className="text-2xl font-bold text-red-400 mb-4">
+        <h1 className="text-2xl font-bold text-white mb-4">
           {project.projectName}
         </h1>
 
