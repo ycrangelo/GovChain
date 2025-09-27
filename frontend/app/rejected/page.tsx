@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { Button } from "@heroui/button";
 import { useRouter } from "next/navigation";
-import { useParams } from 'next/navigation';
 
 // --- CONTRACTS --- //
 const PROJECT_CONTRACT_ADDRESS = "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
@@ -16,8 +15,6 @@ export default function RejectedProjects() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const params = useParams<{ account: string }>();
-  const account = params.account; // dynamic segment [account]
 
   useEffect(() => {
     const fetchRejected = async () => {

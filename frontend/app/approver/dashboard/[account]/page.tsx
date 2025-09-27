@@ -45,19 +45,19 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold">Goverment Projects</h1>
           </div>
           <div className="flex gap-4">
-            <Link href={`/approver/dashboard/${account}/signatories`}>
+            <Link href={`/signatories`}>
               <Button>
                 Approvers
               </Button>
             </Link>
-          <Link href={`/approver/dashboard/${account}/rejected`}>
+          <Link href={`/rejected`}>
             <Button color="danger" className="">
               Rejected
             </Button>
           </Link>
           {isMain && (
             <>
-             <Link href={`/approver/dashboard/${account}/signatories/admin`}>
+             <Link href={`/approver/dashboard/${account}/admin`}>
           <Button color="warning" className="">
             Manage Approvers
           </Button>

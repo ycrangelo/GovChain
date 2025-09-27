@@ -20,10 +20,7 @@ export default function AdminSignatoriesDashboard() {
       {/* Search */}
 <div className="flex items-center justify-between mt-20">
   {/* Left - Back button */}
-        <Link href={`/approver/dashboard/${account}`}>
-          <Button color="danger">Back</Button>
-        </Link>
-
+          <Button onClick={() => window.history.back()} color="danger">Back</Button>
   {/* Center - Title */}
   <h1 className="text-xl font-semibold text-center flex-1">
     Manage Approvers Dashboard
