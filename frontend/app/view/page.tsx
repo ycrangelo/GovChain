@@ -15,9 +15,15 @@ const PROJECT_CONTRACT_ABI = [
 export default function RejectedProjectView() {
   const [project, setProject] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [clientSide, setClientSide] = useState(false);
+
+  // This ensures we only use searchParams on the client side
+  useEffect(() => {
+    setClientSide(true);
+  }, []);
 
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  const id = clientSide ? searchParams.get("id") : null;
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -55,10 +61,16 @@ export default function RejectedProjectView() {
       }
     };
 
-    fetchProject();
-  }, [id]);
+    if (id) {
+      fetchProject();
+    } else if (clientSide) {
+      // If we're on client side but no ID, stop loading
+      setLoading(false);
+    }
+  }, [id, clientSide]);
 
-  if (loading) {
+  // Show loading state during SSR and initial client render
+  if (!clientSide || loading) {
     return (
       <div className="flex items-center justify-center h-screen text-gray-300">
         Loading project details...
@@ -66,6 +78,7 @@ export default function RejectedProjectView() {
     );
   }
 
+  // If no project found after loading
   if (!project) {
     return (
       <div className="flex items-center justify-center h-screen text-red-400">
