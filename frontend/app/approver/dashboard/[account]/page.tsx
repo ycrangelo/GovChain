@@ -10,7 +10,7 @@ import ProjectsApprover from "@/component/ProjectsApprover";
 
 
 export default function Dashboard() {
-  const params = useParams();
+  const params = useParams<{ account: string }>();
   const account = params.account; // dynamic segment [account]
   const [isMain, setIsMain] = useState<boolean>(false);
   const [isSelected, setIsSelected] = useState<boolean>(true);
@@ -67,7 +67,7 @@ export default function Dashboard() {
         </div>
 
         {/* Project Grid */}
-          <ProjectsApprover/>
+          <ProjectsApprover account ={account}/>
       </div>
     </div>
   );

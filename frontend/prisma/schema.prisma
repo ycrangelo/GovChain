@@ -36,3 +36,9 @@ model Projects {
   proposalLink   String     // IPFS link
 }
 
+model Voted{
+    id             String    @id @default(auto()) @map("_id") @db.ObjectId
+    nftId          Int
+    contractAddress   String
+}
+
