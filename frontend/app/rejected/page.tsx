@@ -6,7 +6,7 @@ import { Button } from "@heroui/button";
 import { useRouter } from "next/navigation";
 
 // --- CONTRACTS --- //
-const PROJECT_CONTRACT_ADDRESS = "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
+const PROJECT_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_PROJECT_CONTRACT_ADDRESS!;
 const PROJECT_CONTRACT_ABI = [
   "function getProject(uint256 _id) view returns (uint256,string,string,uint256,address[],string,string,uint8,string)",
 ];
@@ -26,9 +26,7 @@ export default function RejectedProjects() {
         const { count } = await countRes.json();
 
         // 2. Connect to Sepolia RPC
-        const provider = new ethers.JsonRpcProvider(
-          "https://sepolia.infura.io/v3/93ba4b7f4c7244d69db1f6d62490894b"
-        );
+        const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_INFUR_LINK);
         const contract = new ethers.Contract(
           PROJECT_CONTRACT_ADDRESS,
           PROJECT_CONTRACT_ABI,
@@ -40,7 +38,7 @@ export default function RejectedProjects() {
         for (let id = 1; id <= count; id++) {
           const p = await contract.getProject(id);
           // only rejected projects (status === 1)
-          if (Number(p[7]) === 2) {
+          if (Number(p[7]) === 1) {
             tempProjects.push({
               projectId: Number(p[0]),
               projectName: p[1],

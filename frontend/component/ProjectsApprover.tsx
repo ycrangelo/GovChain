@@ -15,12 +15,12 @@ import { addToast } from "@heroui/toast";
 import { useRouter } from "next/navigation";
 
 // --- CONTRACTS --- //
-const PROJECT_CONTRACT_ADDRESS = "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
+const PROJECT_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_PROJECT_CONTRACT_ADDRESS!;
 const PROJECT_CONTRACT_ABI = [
   "function getProject(uint256 _id) view returns (uint256,string,string,uint256,address[],string,string,uint8,string)",
 ];
 
-const VOTING_CONTRACT_ADDRESS = "0xdbAa9146698899C3f512ab70ad68B0A89C452971"; 
+const VOTING_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_VOTING_CONTRACT_ADDRESS!; 
 const VOTING_CONTRACT_ABI = ["function vote(uint256 _projectId, bool approve) external"];
 
 interface Props {
@@ -49,7 +49,7 @@ export default function ProjectsApprover({ account, view }: Props) {
 
         // 2. Connect to Sepolia RPC
         const provider = new ethers.JsonRpcProvider(
-          "https://sepolia.infura.io/v3/93ba4b7f4c7244d69db1f6d62490894b"
+          process.env.NEXT_PUBLIC_INFUR_LINK
         );
         const contract = new ethers.Contract(
           PROJECT_CONTRACT_ADDRESS,

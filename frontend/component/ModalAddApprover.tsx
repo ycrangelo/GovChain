@@ -14,7 +14,7 @@ import { Input } from "@heroui/input";
 import { addToast } from "@heroui/toast";
 import { ethers } from "ethers";
 
-const CONTRACT_ADDRESS = "0x6e4A757459c24059A237434f36a610A96f7146EA"; 
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS!; 
 const CONTRACT_ABI = [
   "function addApprovers(address[] _approverAddress) public",
 ];

@@ -6,7 +6,7 @@ import { Button } from "@heroui/button";
 import { useSearchParams } from "next/navigation";
 
 // --- CONTRACTS --- //
-const PROJECT_CONTRACT_ADDRESS = "0xF6B2A9c1b3Cbd44C49EF45A22a821B93205c684a";
+const PROJECT_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_PROJECT_CONTRACT_ADDRESS!;
 const PROJECT_CONTRACT_ABI = [
   "function getProject(uint256 _id) view returns (uint256,string,string,uint256,address[],string,string,uint8,string)",
 ];
@@ -27,7 +27,7 @@ function RejectedProjectContent() {
         setLoading(true);
 
         const provider = new ethers.JsonRpcProvider(
-          "https://sepolia.infura.io/v3/93ba4b7f4c7244d69db1f6d62490894b"
+          process.env.NEXT_PUBLIC_INFUR_LINK
         );
         const contract = new ethers.Contract(
           PROJECT_CONTRACT_ADDRESS,
