@@ -50,9 +50,11 @@ export default function Dashboard() {
                 Approvers
               </Button>
             </Link>
-          <Button color="danger" className="">
-            Rejected
-          </Button>
+          <Link href={`/approver/dashboard/${account}/rejected`}>
+            <Button color="danger" className="">
+              Rejected
+            </Button>
+          </Link>
           {isMain && (
             <>
              <Link href={`/approver/dashboard/${account}/signatories/admin`}>
@@ -67,7 +69,7 @@ export default function Dashboard() {
         </div>
 
         {/* Project Grid */}
-          <ProjectsApprover account ={account}/>
+          <ProjectsApprover account ={account} view={view}/>
       </div>
     </div>
   );

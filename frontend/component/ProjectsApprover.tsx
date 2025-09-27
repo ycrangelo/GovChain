@@ -22,11 +22,12 @@ const PROJECT_CONTRACT_ABI = [
 const VOTING_CONTRACT_ADDRESS = "0xdbAa9146698899C3f512ab70ad68B0A89C452971"; 
 const VOTING_CONTRACT_ABI = ["function vote(uint256 _projectId, bool approve) external"];
 
-interface Props{
-  account : string
+interface Props {
+  account: string;
+  view: string;
 }
 
-export default function ProjectsApprover({ account }: Props) {
+export default function ProjectsApprover({ account, view }: Props) {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,65 +36,72 @@ export default function ProjectsApprover({ account }: Props) {
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
   const [txLoading, setTxLoading] = useState(false);
 
-useEffect(() => {
-  const fetchProjects = async () => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
 
-      // 1. Get count from API (Mongo or backend)
-      const countRes = await fetch("/api/project/get");
-      const { count } = await countRes.json();
+        // 1. Get count from API (Mongo or backend)
+        const countRes = await fetch("/api/project/get");
+        const { count } = await countRes.json();
 
-      // 2. Connect to Sepolia RPC
-      const provider = new ethers.JsonRpcProvider(
-        "https://sepolia.infura.io/v3/93ba4b7f4c7244d69db1f6d62490894b"
-      );
-      const contract = new ethers.Contract(
-        PROJECT_CONTRACT_ADDRESS,
-        PROJECT_CONTRACT_ABI,
-        provider
-      );
+        // 2. Connect to Sepolia RPC
+        const provider = new ethers.JsonRpcProvider(
+          "https://sepolia.infura.io/v3/93ba4b7f4c7244d69db1f6d62490894b"
+        );
+        const contract = new ethers.Contract(
+          PROJECT_CONTRACT_ADDRESS,
+          PROJECT_CONTRACT_ABI,
+          provider
+        );
 
-      // 3. Get votes of the current user
-      const votesRes = await fetch(`/api/vote/get?address=${account}`); 
-      if (!votesRes.ok) throw new Error("Failed to fetch votes");
-      const votes = await votesRes.json();
+        // 3. Get votes of the current user
+        const votesRes = await fetch(`/api/vote/get?address=${account}`); 
+        if (!votesRes.ok) throw new Error("Failed to fetch votes");
+        const votes = await votesRes.json();
 
-      // extract all nftIds that the user already voted on
-      const votedIds = new Set(votes.map((v: any) => Number(v.nftId)));
+        const votedIds = new Set(votes.map((v: any) => Number(v.nftId)));
 
-      // 4. Fetch projects one by one
-      const tempProjects = [];
-      for (let id = 1; id <= count; id++) {
-        const p = await contract.getProject(id);
+        // 4. Fetch projects one by one
+        const tempProjects = [];
+        for (let id = 1; id <= count; id++) {
+          const p = await contract.getProject(id);
 
-        // skip if already voted
-        if (votedIds.has(Number(p[0]))) continue;
+          // skip if already voted
+          if (votedIds.has(Number(p[0]))) continue;
 
-        tempProjects.push({
-          projectId: Number(p[0]),
-          projectName: p[1],
-          location: p[2],
-          budgetPeso: Number(p[3]),
-          signatories: p[4],
-          timelineStart: p[5],
-          timelineEnd: p[6],
-          status: Number(p[7]),
-          proposalLink: p[8],
+          const project = {
+            projectId: Number(p[0]),
+            projectName: p[1],
+            location: p[2],
+            budgetPeso: Number(p[3]),
+            signatories: p[4],
+            timelineStart: p[5],
+            timelineEnd: p[6],
+            status: Number(p[7]),
+            proposalLink: p[8],
+          };
+
+          tempProjects.push(project);
+        }
+
+        // 🔹 filter based on `view`
+        const filtered = tempProjects.filter((proj) => {
+          if (view === "Approved") return proj.status === 2;
+          if (view === "Proposed") return proj.status === 0;
+          return true; // default = show all
         });
+
+        setProjects(filtered);
+      } catch (err) {
+        console.error("❌ Error fetching projects:", err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setProjects(tempProjects);
-    } catch (err) {
-      console.error("❌ Error fetching projects:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProjects();
-}, [account]);
-
+    fetchProjects();
+  }, [account, view]);
 
   // --- Vote handler --- //
   const handleVote = async (approve: boolean) => {
@@ -123,14 +131,13 @@ useEffect(() => {
       );
 
       const tx = await contract.vote(selectedProject.projectId, approve);
-      const nftId = selectedProject.projectId
-      const res = await fetch("/api/vote/post", {
+      const nftId = selectedProject.projectId;
+
+      await fetch("/api/vote/post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({nftId, account }),
+        body: JSON.stringify({ nftId, account }),
       });
-
-      console.log(res)
 
       addToast({
         title: "Transaction Sent",
@@ -232,20 +239,20 @@ useEffect(() => {
                 <p>Do you approve this project?</p>
                 <div className="flex gap-3">
                   <Button
-                  color="success"
-                  isDisabled={txLoading}
-                  onPress={() => handleVote(true)}
-                >
-                  {txLoading ? "Voting..." : "Yes"}
-                </Button>
-                <Button
-                  color="danger"
-                  variant="light"
-                  isDisabled={txLoading}
-                  onPress={() => handleVote(false)}
-                >
-                  {txLoading ? "Voting..." : "No"}
-                </Button>
+                    color="success"
+                    isDisabled={txLoading}
+                    onPress={() => handleVote(true)}
+                  >
+                    {txLoading ? "Voting..." : "Yes"}
+                  </Button>
+                  <Button
+                    color="danger"
+                    variant="light"
+                    isDisabled={txLoading}
+                    onPress={() => handleVote(false)}
+                  >
+                    {txLoading ? "Voting..." : "No"}
+                  </Button>
                 </div>
               </ModalBody>
               <ModalFooter>
